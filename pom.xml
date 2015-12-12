@@ -33,6 +33,7 @@
   </properties>
   <modules>
     <module>dkpro-script-groovy</module>
+    <module>dkpro-script-doc</module>
   </modules>
   <dependencyManagement>
     <dependencies>
