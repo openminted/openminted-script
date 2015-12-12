@@ -2,43 +2,34 @@
   url: "https://dkpro.github.io"
   side: left
 
-- title: PROJECT_X
+- title: Script
   url: "/"
   side: left
 
-- title: Downloads
-  url: "/downloads/"
-  side: left
+#- title: Downloads
+#  url: "/downloads/"
+#  side: left
 
 - title: Documentation
   url: "/documentation/"
   side: left
-#  dropdown:
-#  - title: "Components"
-#    url: "/components/"
-#  - title: "Models"
-#    url: "/models/"
-#  - title: "Formats"
-#    url: "/formats/"
-#  - title: "Typesystem"
-#    url: "/typesystem/"
 
 - title: "Issues"
-  url: "http://github.com/dkpro/PROJECT_X/issues"
+  url: "http://github.com/dkpro/dkpro-script/issues"
   side: left
 
 - title: Source
-  url: "http://github.com/dkpro/PROJECT_X"
+  url: "http://github.com/dkpro/dkpro-script"
   side: left
 
-#- title: "Contact"
-#  url: "/mailinglists/"
-#  side: left
-#  dropdown:
-#  - title: "Mailing lists"
-#    url: "/mailinglists/"
-#  - title: "Twitter"
-#    url: "http://twitter.com/PROJECT_X"
+- title: "Contact"
+  url: "/mailinglists/"
+  side: left
+  dropdown:
+  - title: "Mailing lists"
+    url: "/mailinglists/"
+  - title: "Twitter"
+    url: "http://twitter.com/dkprocore"
 #  - title: "Contributing"
 #    url: "http://github.com/dkpro/PROJECT_X/blob/master/CONTRIBUTING.md"
 #  - title: "Contributors"

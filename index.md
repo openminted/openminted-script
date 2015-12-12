@@ -5,18 +5,42 @@
 # this work, you have to use › layout: frontpage
 #
 layout: frontpage
-title: "DKPro Core"
+title: "DKPro Script"
 #header:
 #	title: DKPro Core
 #   image_fullwidth: "header_unsplash_12.jpg"
 header-1:
-    title: A collection of software components for natural language processing (NLP) based on the Apache UIMA framework.
-    text: Many NLP tools are already freely available in the NLP research community. DKPro Core provides Apache UIMA components wrapping these tools (and some original tools) so they can be used interchangeably in UIMA processing pipelines. DKPro Core builds heavily on uimaFIT which allows for rapid and easy development of NLP processing pipelines, for wrapping existing tools and for creating original UIMA components.
+    title: Building pipelines with DKPro Core as easy as it can get.
+    text: DKPro Script provides a DSL to build DKPro Core pipelines with a clean syntax and minimal effort.
 ---
 
+This example is using an unrelease version of DKPro Core. Once DKPro Core 1.8.0 is released, it will become even shorter.
+
+{% highlight groovy %}
+#!/usr/bin/env groovy
+@GrabResolver(name='apache-snapshots', 
+    root='http://repository.apache.org/snapshots')
+@GrabResolver(name='ukp-oss-snapshots',
+    root='http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots')
+@Grab('org.dkpro.script:dkpro-script-groovy:0.0.1-SNAPSHOT')
+import groovy.transform.BaseScript
+import org.dkpro.script.groovy.DKProCoreScript;
+@BaseScript DKProCoreScript baseScript
+
+version '1.8.0-SNAPSHOT'
+
+read 'String' language 'de' params([
+    documentText: 'This is a test.'])
+apply 'OpenNlpSegmenter'
+apply 'OpenNlpPosTagger'
+write 'Conll2006'
+
+{% endhighlight %}
 
 How to cite
 -----------
+
+There is no dedicated publication on DKPro Script. Please cite the components that you use and DKPro Core as indicated below.
 
 Many of the wrapped third-party components and the models used by them should be cited individually. We currently do not provide a comprehensive overview over citable publications. We encourage you to track down citable publications for these dependencies. However, you might find pointers to some relevant publications in the Model overview of the DKPro Core release you are using or in the JavaDoc of individual components.
 
@@ -28,32 +52,12 @@ Please cite DKPro Core itself as:
 License
 -------
 
+DKPro Script itself is licensed under the [Apache Software License (ASL) version 2][3]. Please respect the licenses of DKPro Core and the integrated components as stated below:
+
 All components in DKPro Core ASL are licensed under the [Apache Software License (ASL) version 2][3] - but their dependencies may not be:
 
 **IMPORTANT LICENSE NOTE** - It must be pointed out that while the component's source code itself is licensed under the ASL, individual components might make use of third-party libraries or products that are not licensed under the ASL, such as LGPL libraries or libraries which are free for research but may not be used in commercial scenarios. Please be aware of the third party licenses and respect them.
 
-About DKPro Core
-----------------
-
-This project was initiated by the Ubiquitous Knowledge Processing Lab (UKP) at the Technische Universität Darmstadt, Germany under the auspices of Prof. Dr. Iryna Gurevych.
-
-It is now jointly developed at UKP Lab, Technische Universität Darmstadt and Language Technology Lab, Universität Duisburg-Essen.
-
-
-<span class="footnotes">**Image sources**: [LogoJava.png][4] by Christian F. Burprich, Creative Commons (Attribution-Noncommercial-Share Alike 3.0 Unported), color changed; [LogoPython.png][5] by IFA; [LogoGroovy.png][6] by pictonic.co; [IconComponents.png][7], [IconModels.png][8] by [Visual Pharm][9]; [IconFormatText.png][10], [IconFormatBlank.png][11] by [Honza Dousek][12]; [IconTypeSystem.png][13] by Designmodo</span>
-
 [1]: https://www.ukp.tu-darmstadt.de/fileadmin/user_upload/Group_UKP/OIAF4HLT2014DKProCore_cameraready.pdf
 [2]: https://www.ukp.tu-darmstadt.de/publications/details/?no_cache=1&tx_bibtex_pi1%5Bpub_id%5D=TUD-CS-2014-0864&type=99&tx_bibtex_pi1%5Bbibtex%5D=yes
 [3]: http://www.apache.org/licenses/LICENSE-2.0
-[4]: https://www.iconfinder.com/icons/16890/java_icon#size=128
-[5]: https://www.iconfinder.com/icons/282803/logo_python_icon#size=128
-[6]: http://findicons.com/icon/576242/pl_groovy_02?id=576242
-[7]: https://www.iconfinder.com/icons/175334/services_icon#size=128
-[8]: https://www.iconfinder.com/icons/174880/database_icon#size=128
-[9]: http://icons8.com/
-[10]: https://www.iconfinder.com/icons/199323/extension_file_format_txt_icon#size=128
-[11]: https://www.iconfinder.com/icons/199231/blank_extension_file_format_icon#size=128
-[12]: https://www.iconfinder.com/iconsets/lexter-flat-colorfull-file-formats
-[13]: https://www.iconfinder.com/icons/115791/tag_icon#size=128
-[14]: http://uima.apache.org
-[15]: http://uima.apache.org/uimafit
