@@ -1,26 +1,25 @@
-/*******************************************************************************
- * Copyright 2015
- * Ubiquitous Knowledge Processing (UKP) Lab
- * Technische Universität Darmstadt
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+// ******************************************************************************
+// Copyright 2015
+// Ubiquitous Knowledge Processing (UKP) Lab
+// Technische Universität Darmstadt
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//   http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ****************************************************************************/
 package org.dkpro.script.groovy;
 
 import groovy.grape.Grape;
 import groovy.json.*;
 
-@Grab('org.apache.uima:uimafit-core:2.1.0')
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.*;
 import static org.apache.uima.fit.factory.CollectionReaderFactory.*;
 import static org.apache.uima.fit.factory.TypeSystemDescriptionFactory.*;
@@ -362,7 +361,7 @@ abstract class DKProCoreScript extends Script {
         }
     }
 
-    class Helper {
+    static class Helper {
         static def argsToClassses(java.util.Collection args) {
             return args.collect {
                     if (it == null) {

@@ -47,6 +47,11 @@
         <artifactId>groovy-json</artifactId>
         <version>${groovy.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.codehaus.groovy</groupId>
+        <artifactId>groovy-templates</artifactId>
+        <version>${groovy.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <profiles>
@@ -65,6 +70,10 @@
         <dependency>
           <groupId>org.codehaus.groovy</groupId>
           <artifactId>groovy-json</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.codehaus.groovy</groupId>
+          <artifactId>groovy-templates</artifactId>
         </dependency>
       </dependencies>
       <build>

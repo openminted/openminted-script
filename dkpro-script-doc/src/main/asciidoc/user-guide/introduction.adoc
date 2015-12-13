@@ -20,3 +20,73 @@
 
 DKPro Script is a domain specific language (DSL) based on Groovy that greatly facilitates building
 pipelines using DKPro Core components.
+
+== Script structure
+
+The script starts with a mandatory preamble that sets up the DKPro Script environment:
+
+[source,groovy,subs="+attributes"]
+----
+#!/usr/bin/env groovy
+@Grab('org.dkpro.script:dkpro-script-groovy:{revnumber}')
+@groovy.transform.BaseScript org.dkpro.script.groovy.DKProCoreScript baseScript
+----
+
+After the preamble follows the actual script. There are three main commands `read`, `apply`, and 
+`write`. The `read` command must appear first and there can only be one `read` command per script.
+Any number of `apply` and `write` commands may follow.
+
+[source,groovy,subs="+attributes"]
+----
+read 'String' language 'en' params([
+    documentText: 'This is a test.'])
+apply 'OpenNlpSegmenter'
+apply 'OpenPosTagger'
+write 'Conll2006'
+----
+
+== Custom components
+
+=== Readers
+
+If a format should be processed that is not supported by DKPro Core yet, a custom reader can be
+defined within the script. 
+
+[source,groovy,subs="+attributes"]
+----
+def plainText = {
+    def res = nextFile();
+    initCas(jcas, res);
+    jcas.documentText = res.inputStream.getText('UTF-8');
+}
+
+read plainText language 'en' from 'lala.txt'
+----
+
+=== Engines
+
+[source,groovy,subs="+attributes"]
+----
+apply {
+    select type('Token') each { println "${it.coveredText} ${it.pos.posValue}" }
+}
+----
+
+=== Writers
+
+[source,groovy,subs="+attributes"]
+----
+write {
+    select type('Token') each { println "${it.coveredText} ${it.pos.posValue}" }
+}
+----
+
+=== Commands
+
+Within the code blocks that implement custom components, additional commands are available.
+
+* type(String)
+* select
+* selectCovered
+* selectSingle
+* ...
