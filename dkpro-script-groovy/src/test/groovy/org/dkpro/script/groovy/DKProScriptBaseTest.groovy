@@ -34,6 +34,7 @@ class DKProScriptBaseTest {
     public static Iterable<Object[]> testScripts() {
         def dirs = [];
         new File("src/test/resources").eachDir({ dirs << ([ it.name ] as Object[]) });
+        // dirs = [ ["StringReader_ClosureWriter2"] as Object[] ];
         return dirs;
     }
     
@@ -124,7 +125,7 @@ class DKProScriptBaseTest {
             File referenceDir = new File("src/test/resources/${aName}/output");
             referenceDir.eachFileRecurse(FileType.FILES, { referenceFile ->
                 String relPath = referenceFile.absolutePath.substring(referenceDir.absolutePath.length());
-                File actualFile = new File("src/test/resources/${aName}/output/${relPath}");
+                File actualFile = new File("target/test-output/${aName}/${relPath}");
                 assertEquals(
                     referenceFile.getText("UTF-8").trim(),
                     actualFile.getText("UTF-8").trim())
