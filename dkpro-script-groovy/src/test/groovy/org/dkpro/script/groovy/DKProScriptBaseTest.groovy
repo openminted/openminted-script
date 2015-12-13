@@ -1,0 +1,90 @@
+package org.dkpro.script.groovy
+
+import static org.junit.Assert.*
+import groovy.io.FileType
+
+import org.codehaus.groovy.control.CompilerConfiguration
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import org.junit.runners.Parameterized.Parameters
+
+@RunWith(value = Parameterized.class)
+class DKProScriptBaseTest {
+    // Scan all the subdirs in src/test/resources and use them to parametrize the test
+    @Parameters(name = "{index}: running script {0}")
+    public static Iterable<Object[]> testScripts() {
+        def dirs = [];
+        new File("src/test/resources").eachDir({ dirs << ([ it.name ] as Object[]) });
+        return dirs;
+    }
+    
+    private String script;
+    
+    public DKProScriptBaseTest(String aName)
+    {
+        script = aName;
+    }
+    
+    @Test
+    public void runTest()
+    {
+        // If we have an "output.txt" file next to the script, we capture stdout and compare
+        // it to the file's contents
+        runTest(script, new File("src/test/resources/${script}/output.txt").exists());
+    }
+    
+    public void runTest(String aName, boolean aCaptureStdOut) {
+        PrintStream originalOut;
+        ByteArrayOutputStream capturedOut;
+        if (aCaptureStdOut) {
+            // System.err.println "Capturing stdout...";
+            originalOut = System.out;
+            capturedOut = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(capturedOut));
+        }
+        
+        try {
+            System.setProperty("grape.root", "target/test-output/grapes");
+            
+            CompilerConfiguration cc = new CompilerConfiguration();
+            cc.setScriptBaseClass(DKProCoreScript.name);
+    
+            def base = new File("src/test/resources/${aName}").toURI().toURL().toString();
+    
+            // Create a GroovyClassLoader explicitly here so that Grape can work in the script
+            GroovyClassLoader gcl = new GroovyClassLoader(this.getClass().getClassLoader(), cc);
+            GroovyScriptEngine engine = new GroovyScriptEngine("src/test/resources/${aName}", gcl);
+            engine.setConfig(cc);
+    
+            Binding binding = new Binding();
+            binding.setVariable("testOutputPath", "target/test-output/${aName}".toString());
+            Script script = engine.createScript("script.groovy", binding);
+            script.run();
+        }
+        finally {
+            if (aCaptureStdOut) {
+                // System.err.println "Capturing complete.";
+                System.setOut(originalOut);
+            }
+        }
+        
+        // Compare captured output
+        if (aCaptureStdOut) {
+            assertEquals(
+                new File("src/test/resources/${aName}/output.txt").getText('UTF-8').trim(),
+                capturedOut.toString('UTF-8').trim());
+        }
+        // Compare file-based output
+        else {
+            File referenceDir = new File("src/test/resources/${aName}/output");
+            referenceDir.eachFileRecurse(FileType.FILES, { referenceFile ->
+                String relPath = referenceFile.absolutePath.substring(referenceDir.absolutePath.length());
+                File actualFile = new File("src/test/resources/${aName}/output/${relPath}");
+                assertEquals(
+                    referenceFile.getText("UTF-8").trim(),
+                    actualFile.getText("UTF-8").trim())
+            });
+        }
+    }
+}

@@ -43,7 +43,7 @@ abstract class DKProCoreScript extends Script {
     def formats;
 
     def pipeline = [];
-
+    
     abstract void scriptBody()
 
     def version(ver) {
@@ -83,20 +83,30 @@ abstract class DKProCoreScript extends Script {
     }
 
     def run() {
-        boot();
-        scriptBody();
-        // Force re-scan of type systems because we dynamically add JARs to the
-        // classpath using grape - failure to do so will cause some types not to
-        // be detected when the pipeline is actually run
-        forceTypeDescriptorsScan();
-        def ts = createTypeSystemDescription();
-        // runpipeline constructs the type system from the descriptors passed to
-        // it - make sure at least one of the components actually has the full
-        // type system
-        pipeline[0].desc.collectionReaderMetaData.typeSystem = ts;
-        runPipeline(
-            pipeline[0].desc as CollectionReaderDescription, 
-            pipeline[1..-1].collect { it.desc } as AnalysisEngineDescription[]);
+        // We set the thread context classloader such that UIMA has access to all the classes
+        // defined in the script and loaded via grab.
+        ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(findClassLoader());
+        try {
+            boot();
+            scriptBody();
+            // Force re-scan of type systems because we dynamically add JARs to the
+            // classpath using grape - failure to do so will cause some types not to
+            // be detected when the pipeline is actually run
+            forceTypeDescriptorsScan();
+            def ts = createTypeSystemDescription();
+            // runpipeline constructs the type system from the descriptors passed to
+            // it - make sure at least one of the components actually has the full
+            // type system
+            pipeline[0].desc.collectionReaderMetaData.typeSystem = ts;
+            runPipeline(
+                pipeline[0].desc as CollectionReaderDescription, 
+                pipeline[1..-1].collect { it.desc } as AnalysisEngineDescription[]);
+        }
+        finally {
+            Thread.currentThread().setContextClassLoader(oldLoader);
+        }
+
     }
 
     class Component {
@@ -137,19 +147,22 @@ abstract class DKProCoreScript extends Script {
         def impl;
         if (component.endsWith("Reader")) {
             def format = formats[component[0..-7]];
-            Grape.grab(group:format.groupId, module:format.artifactId, version: VERSION);
+            Grape.grab(group:format.groupId, module:format.artifactId, version: VERSION,
+                classLoader: findClassLoader());
             impl = this.class.classLoader.loadClass(format.readerClass, true, false);
             desc = createReaderDescription(impl);
         }
         else if (component.endsWith("Writer")) {
             def format = formats[component[0..-7]];
-            Grape.grab(group:format.groupId, module:format.artifactId, version: VERSION);
+            Grape.grab(group:format.groupId, module:format.artifactId, version: VERSION,
+                classLoader: findClassLoader());
             impl = this.class.classLoader.loadClass(format.writerClass, true, false);
             desc = createEngineDescription(impl);
         }
         else {
             def engine = engines[component];
-            Grape.grab(group:engine.groupId, module:engine.artifactId, version: VERSION);
+            Grape.grab(group:engine.groupId, module:engine.artifactId, version: VERSION,
+                classLoader: findClassLoader());
             impl = this.class.classLoader.loadClass(engine.class, true, false);
             desc = createEngineDescription(impl);
         }
@@ -219,7 +232,8 @@ abstract class DKProCoreScript extends Script {
         else if (format in Closure) {
             // Need to load the DKPro Core IO API here
             Grape.grab(group:'de.tudarmstadt.ukp.dkpro.core', 
-                module:'de.tudarmstadt.ukp.dkpro.core.api.io-asl', version: VERSION);
+                module:'de.tudarmstadt.ukp.dkpro.core.api.io-asl', version: VERSION,
+                classLoader: findClassLoader());;
 
             def templateText = '''
             import $helper;
@@ -245,7 +259,7 @@ abstract class DKProCoreScript extends Script {
             def te = new groovy.text.SimpleTemplateEngine();
             def template = te.createTemplate(templateText);
             def result = template.make(data);
-            def cls = this.class.classLoader.parseClass(result.toString());
+            def cls = findClassLoader().parseClass(result.toString());
 
             def component = new Component();
             component.name = cls.name;
@@ -276,31 +290,8 @@ abstract class DKProCoreScript extends Script {
             return component;
         }
         else if (engine in Closure) {
-            def templateText = '''
-            import $helper;
-
-            class $name extends org.apache.uima.fit.component.JCasAnnotator_ImplBase
-            {
-                void process(org.apache.uima.jcas.JCas jcas) {
-                    $helper helper = new $helper();
-                    helper.jcas = jcas;
-                    def closure = Class.forName('$closure').newInstance(this, (Object) null);
-                    closure.delegate = helper;
-                    closure.resolveStrategy = Closure.DELEGATE_FIRST;
-                    closure.call(jcas);
-                }
-            }
-            '''
-            def data = [
-                name: 'ClosureWrapper_' + (UUID.randomUUID() as String).replace('-', ''),
-                closure: engine.class.name,
-                helper: EngineHelper.class.name
-            ];
-
-            def te = new groovy.text.SimpleTemplateEngine();
-            def template = te.createTemplate(templateText);
-            def result = template.make(data);
-            def cls = this.class.classLoader.parseClass(result.toString());
+            def result = Helper.closureWrapper(engine, EngineHelper.class)
+            def cls = findClassLoader().parseClass(result.toString());
 
             def component = new Component();
             component.name = cls.name;
@@ -323,7 +314,9 @@ abstract class DKProCoreScript extends Script {
         def jcas;
 
         def type(String name) {
-            def matches = jcas.typeSystem.typeIterator.toList().grep({it.name.endsWith(name)});
+            def matches = jcas.typeSystem.typeIterator.toList().grep({
+                it.name.endsWith('.'+name) && it.name == name
+            });
             switch (matches.size) {
                 case 0: throw new IllegalArgumentException("No type matches '$name'");
                 case 1: return matches[0];
@@ -360,6 +353,10 @@ abstract class DKProCoreScript extends Script {
             }
         }
     }
+    
+    class WriterHelper extends EngineHelper {
+        
+    }
 
     static class Helper {
         static def argsToClassses(java.util.Collection args) {
@@ -375,19 +372,70 @@ abstract class DKProCoreScript extends Script {
                     }
                 } as Object[];
         }
+        
+        static def closureWrapper(closure, helper) {
+            def templateText = '''
+            import $helper;
+
+            class $name extends org.apache.uima.fit.component.JCasAnnotator_ImplBase
+            {
+                void process(org.apache.uima.jcas.JCas jcas) {
+                    $helper helper = new $helper();
+                    helper.jcas = jcas;
+                    def closure = Class.forName('$closure').newInstance(this, (Object) null);
+                    closure.delegate = helper;
+                    closure.resolveStrategy = Closure.DELEGATE_FIRST;
+                    closure.call(jcas);
+                }
+            }
+            '''
+            def data = [
+                name: 'ClosureWrapper_' + (UUID.randomUUID() as String).replace('-', ''),
+                closure: closure.class.name,
+                helper: helper.name
+            ];
+
+            def te = new groovy.text.SimpleTemplateEngine();
+            def template = te.createTemplate(templateText);
+            def result = template.make(data);
+        }
+    }
+
+    def findClassLoader() {
+        def classLoader;
+        // When setting the parentClassLoader property, then UIMA no longer has access to the
+        // classes defined in the script, e.g. to closures!
+        if (binding.variables.get("parentClassLoader")) {
+            classLoader = binding.variables.get("parentClassLoader");
+        }
+        else {
+            classLoader = this.class.classLoader;
+        }
+        return classLoader;
     }
 
     def write(format) {
         if (format instanceof String) {
             assert formats[format];
 
-            component = load(format+"Writer");
+            def component = load(format+"Writer");
             pipeline.add(component);
             return component;
         }
-        else  {
-            apply(format);
-        }       
+        else if (format in Closure) {
+            def result = Helper.closureWrapper(format, WriterHelper.class)
+            def cls = findClassLoader().parseClass(result.toString());
+
+            def component = new Component();
+            component.name = cls.name;
+            component.impl = cls;
+            component.desc = createEngineDescription(component.impl);
+            pipeline.add(component);
+            return component;
+        }
+        else {
+            throw new IllegalArgumentException("Cannot write $format");
+        }
     }
 
     def typeSystem() {
@@ -395,7 +443,5 @@ abstract class DKProCoreScript extends Script {
         ts.types.each {
             println it.name;
         }
-        println this.class.classLoader;
-        println TypeSystemDescriptionFactory.class.classLoader.URLs;
     }
 }
