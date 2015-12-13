@@ -21,6 +21,7 @@ import static org.junit.Assert.*
 import groovy.io.FileType
 
 import org.codehaus.groovy.control.CompilerConfiguration
+import org.junit.Before;
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -43,6 +44,34 @@ class DKProScriptBaseTest {
         script = aName;
     }
     
+    private String oldModelCache;
+    private String oldGrapeCache;
+    
+    @Before
+    public void setup()
+    {
+        oldModelCache = System.setProperty("dkpro.model.repository.cache", 
+            "target/test-output/models");
+        oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
+    }
+
+    @Before
+    public void after()
+    {
+        if (oldModelCache != null) {
+            System.setProperty("dkpro.model.repository.cache", oldModelCache);
+        }
+        else {
+            System.getProperties().remove("dkpro.model.repository.cache");
+        }
+        if (oldGrapeCache != null) {
+            System.setProperty("grape.root", oldGrapeCache);
+        }
+        else {
+            System.getProperties().remove("grape.root");
+        }
+    }
+
     @Test
     public void runTest()
     {
@@ -62,8 +91,6 @@ class DKProScriptBaseTest {
         }
         
         try {
-            System.setProperty("grape.root", "target/test-output/grapes");
-            
             CompilerConfiguration cc = new CompilerConfiguration();
             cc.setScriptBaseClass(DKProCoreScript.name);
     
