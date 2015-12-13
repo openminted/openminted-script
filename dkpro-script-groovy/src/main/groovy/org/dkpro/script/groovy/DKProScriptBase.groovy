@@ -315,7 +315,7 @@ abstract class DKProCoreScript extends Script {
 
         def type(String name) {
             def matches = jcas.typeSystem.typeIterator.toList().grep({
-                it.name.endsWith('.'+name) && it.name == name
+                it.name.endsWith('.'+name) || it.name == name
             });
             switch (matches.size) {
                 case 0: throw new IllegalArgumentException("No type matches '$name'");
