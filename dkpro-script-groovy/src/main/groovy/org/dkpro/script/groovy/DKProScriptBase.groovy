@@ -215,7 +215,7 @@ abstract class DKProCoreScript extends Script {
             throw new IllegalStateException("Reader must be first and there can only be one");
         }
 
-        if (format instanceof String) {
+        if (format instanceof String || format instanceof GString) {
             assert formats[format];
             def component = load(format+"Reader");
             pipeline.add(component);
@@ -274,7 +274,7 @@ abstract class DKProCoreScript extends Script {
     }
 
     def apply(engine) {
-        if (engine instanceof String) {
+        if (engine instanceof String || engine instanceof GString) {
             assert engines[engine];
 
             def component = load(engine);
@@ -415,7 +415,7 @@ abstract class DKProCoreScript extends Script {
     }
 
     def write(format) {
-        if (format instanceof String) {
+        if (format instanceof String || format instanceof GString) {
             assert formats[format];
 
             def component = load(format+"Writer");
