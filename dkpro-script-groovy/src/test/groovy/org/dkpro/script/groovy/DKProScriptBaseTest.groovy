@@ -91,6 +91,7 @@ class DKProScriptBaseTest {
             System.setOut(new PrintStream(capturedOut));
         }
         
+        boolean error = true;
         try {
             CompilerConfiguration cc = new CompilerConfiguration();
             cc.setScriptBaseClass(DKProCoreScript.name);
@@ -106,11 +107,15 @@ class DKProScriptBaseTest {
             binding.setVariable("testOutputPath", "target/test-output/${aName}".toString());
             Script script = engine.createScript("script.groovy", binding);
             script.run();
+            error = false;
         }
         finally {
             if (aCaptureStdOut) {
                 // System.err.println "Capturing complete.";
                 System.setOut(originalOut);
+            }
+            if (error) {
+                System.out.println(capturedOut.toString('UTF-8'));
             }
         }
         
