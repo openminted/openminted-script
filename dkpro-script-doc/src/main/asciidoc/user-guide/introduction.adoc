@@ -45,6 +45,163 @@ apply 'OpenPosTagger'
 write 'Conll2006'
 ----
 
+== Commands
+
+=== read
+
+The `read` command defines the source of the data being processed by the pipeline. 
+
+.Synopsis
+[source,groovy]
+----
+read '<FORMAT>' language '<LANG>' from '<LOCATION>' params ([
+    <param1>: <value1>,
+    <param2>: <value2>,
+    ...
+  ])
+----
+
+.Arguments
+`<FORMAT>`::
+  the format of the data to be read. To get a list of the supported formats, use the
+  `inventory` command.
+`language <LANG>` (optional)::
+  the language of the data to be read. This must be a two-letter ISO code. 
+  This is a shortcut for specifying `language` in `params`.
+`from <LOCATION>` (optional)::
+  the location from where the data is to be read. This is required for most formats,
+  but not for all. For example the `String` format expects the document text to be specified via
+  `params`. This is a shortcut for specifying `sourceLocation` in `params`.
+`params([<param1>: <value1>,...])` (optional)::
+  additional parameters to be passed to the underlying reader. To see the available
+  parameters for a specified format use the `explain` command.  
+
+.Examples
+[source,groovy]
+----
+read 'Xmi' language 'en' from '*.xmi'
+
+read 'Text' language 'en' from 'textfile.txt'
+
+read 'Conll2006' language 'en' from '**/*.conll'
+
+read 'String' language 'en' params([
+    documentText: 'This is a test.'])
+----
+
+=== apply
+
+.Synopsis
+[source,groovy]
+----
+apply '<ENGINE>' params ([
+    <param1>: <value1>,
+    <param2>: <value2>,
+    ...
+  ])
+----
+
+.Examples
+[source,groovy]
+----
+apply 'OpenNlpSegmenter'
+
+apply 'StanfordParser' params([
+    writePennTree: true])
+----
+
+=== write
+
+The `write` command defines where to output the processed data. The command can appear any time 
+after the `read` command but typically appears at the end of the pipeline. It can appear multiple
+times, either to write out different formats or to write output at different stages of processing,
+i.e. when `write` appears in between `apply` commands.
+
+.Synopsis
+[source,groovy]
+----
+write '<FORMAT>' to '<LOCATION>' params ([
+    <param1>: <value1>,
+    <param2>: <value2>,
+    ...
+  ])
+----
+
+.Arguments
+`<FORMAT>`::
+  the format of the data to be write. To get a list of the supported formats, use the
+  `inventory` command.
+`to <LOCATION>` (optional)::
+  the location to write the output to. If this is omitted, most writers will write their output
+  output to standard out (if using DKPro Core 1.8.0 or higher). Most format will treat the location
+  as a target folder and for each input file, they create an output file in this folder. For some
+  formats, the location specifies a file name. This is a shortcut for specifying `targetLocation` in
+  `params`. 
+`params([<param1>: <value1>,...])` (optional)::
+  additional parameters to be passed to the underlying writer. To see the available
+  parameters for a specified format use the `explain` command.  
+
+.Examples
+[source,groovy]
+----
+// Write result to screen in Conll2006 format
+write 'Conll2006'
+
+// Write output file per input file to the folder 'output' in Conll2006 format
+write 'Conll2006' to 'output'
+
+// Write a single aggregate file 'output.conll' in Conll2006 format
+write 'Conll2006' to 'output.conll' params([
+    singularTarget: true
+  ])
+----
+
+=== inventory
+
+.Synopsis
+[source,groovy]
+----
+inventory()
+----
+
+=== explain
+
+.Synopsis
+[source,groovy]
+----
+explain '<COMPONENT>'
+----
+
+.Arguments
+`<COMPONENT>`::
+  the component to be explained. This can either be the name of an engine (cf. `apply`) or the name
+  of a format (cf. `read`, `write`). When explaining a format, the explanation may contain a section
+  for a 'Reader' and for a 'Writer'. In case only an explanation of the reading or writing aspect of
+  a format is desired, append `Reader` or `Writer` to the format name.
+
+.Examples
+[source,groovy]
+----
+// Explain the OpenNlpSegmenter engine
+explain 'OpenNlpSegmenter'
+
+// Explain the Conll2006 format (reading and writing)
+explain 'Conll2006'
+
+// Explain the Conll2006 format (reading only)
+explain 'Conll2006Reader'
+----
+
+=== version
+
+.Examples
+[source,groovy]
+----
+version '1.7.0'
+
+version '1.8.0-SNAPSHOT'
+----
+
 == Custom components
 
 === Readers
@@ -81,7 +238,7 @@ write {
 }
 ----
 
-=== Commands
+=== Component block commmands
 
 Within the code blocks that implement custom components, additional commands are available.
 
