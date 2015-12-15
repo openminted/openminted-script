@@ -98,10 +98,12 @@ abstract class DKProCoreScript extends Script {
             // runpipeline constructs the type system from the descriptors passed to
             // it - make sure at least one of the components actually has the full
             // type system
+            if (!pipeline.empty) {
             pipeline[0].desc.collectionReaderMetaData.typeSystem = ts;
             runPipeline(
                 pipeline[0].desc as CollectionReaderDescription, 
                 pipeline[1..-1].collect { it.desc } as AnalysisEngineDescription[]);
+        }
         }
         finally {
             Thread.currentThread().setContextClassLoader(oldLoader);
