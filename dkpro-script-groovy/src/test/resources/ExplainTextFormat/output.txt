@@ -1,0 +1,49 @@
+TextReader
+==========
+UIMA collection reader for plain text files.
+
+Parameters
+----------
+
+* sourceEncoding (String) 
+  Name of configuration parameter that contains the character encoding used by the input files.
+
+* sourceLocation (String) 
+  Location from which the input is read.
+
+* patterns (String) MULTI
+  A set of Ant-like include/exclude patterns. A pattern starts with #INCLUDE_PREFIX [+] if it is an include pattern and with #EXCLUDE_PREFIX [-] if it is an exclude pattern. The wildcard <code>&#47;**&#47;</code> can be used to address any number of sub-directories. The wildcard * can be used to a address a part of a name.
+
+* useDefaultExcludes (Boolean) 
+  Use the default excludes.
+
+* includeHidden (Boolean) 
+  Include hidden files and directories.
+
+* language (String) 
+  Name of optional configuration parameter that contains the language of the documents in the input directory. If specified, this information will be added to the CAS.
+
+TextWriter
+==========
+UIMA CAS consumer writing the CAS document text as plain text file.
+
+Parameters
+----------
+
+* filenameSuffix (String) 
+  Specify the suffix of output files. Default value <code>.txt</code>. If the suffix is not needed, provide an empty string as value.
+
+* targetLocation (String) 
+  Target location
+
+* compression (String) 
+  Choose a compression method. (default: CompressionMethod#NONE)
+
+* stripExtension (Boolean) 
+  Remove the original extension.
+
+* useDocumentId (Boolean) 
+  Use the document ID as file name even if a relative path information is present.
+
+* escapeDocumentId (Boolean) 
+  URL-encode the document ID in the file name to avoid illegal characters (e.g. \, :, etc.)

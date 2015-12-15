@@ -99,11 +99,11 @@ abstract class DKProCoreScript extends Script {
             // it - make sure at least one of the components actually has the full
             // type system
             if (!pipeline.empty) {
-            pipeline[0].desc.collectionReaderMetaData.typeSystem = ts;
-            runPipeline(
-                pipeline[0].desc as CollectionReaderDescription, 
-                pipeline[1..-1].collect { it.desc } as AnalysisEngineDescription[]);
-        }
+                pipeline[0].desc.collectionReaderMetaData.typeSystem = ts;
+                runPipeline(
+                    pipeline[0].desc as CollectionReaderDescription, 
+                    pipeline[1..-1].collect { it.desc } as AnalysisEngineDescription[]);
+            }
         }
         finally {
             Thread.currentThread().setContextClassLoader(oldLoader);
@@ -177,7 +177,18 @@ abstract class DKProCoreScript extends Script {
     }
 
     def explain(componentOrName) {
-        def component = componentOrName instanceof String ? load(componentOrName) : componentOrName;
+        if (formats[componentOrName]) {
+            if (formats[componentOrName].readerClass) {
+                explain("${componentOrName}Reader");
+            }
+            if (formats[componentOrName].writerClass) {
+                explain("${componentOrName}Writer");
+            }
+            return;
+        }
+        
+        def component = (componentOrName instanceof String || componentOrName instanceof GString) ? 
+            load(componentOrName) : componentOrName;
         def desc = component.desc;
 
         def paramDecls;
