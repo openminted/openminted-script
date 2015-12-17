@@ -37,6 +37,11 @@ write 'Conll2006'
 
 {% endhighlight %}
 
+{% assign stable = (site.data.releases | where:"status", "stable" | first) %}
+{% assign unstable = (site.data.releases | where:"status", "unstable" | first) %}
+
+{% unless unstable.user_guide_url == null %} For more information, please refer to the [User Guide]({{ unstable.user_guide_url }}).{% endunless %}
+
 How to cite
 -----------
 
