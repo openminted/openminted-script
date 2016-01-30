@@ -21,7 +21,9 @@ import static org.junit.Assert.*
 import groovy.io.FileType
 
 import org.codehaus.groovy.control.CompilerConfiguration
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -33,8 +35,9 @@ class DKProScriptBaseTest {
     @Parameters(name = "{index}: running script {0}")
     public static Iterable<Object[]> testScripts() {
         def dirs = [];
-        new File("src/test/resources").eachDir({ dirs << ([ it.name ] as Object[]) });
-        // dirs = [ ["StringReader_ClosureWriter2"] as Object[] ];
+        new File("src/test/resources/DKProScriptBase").eachDir({ dirs << ([ it.name ] as Object[]) });
+        // Uncomment below and enter the name of one or more tests to run these specifically.
+        // dirs = [ ["ExplainTextFormat"] as Object[] ];
         return dirs;
     }
     
@@ -45,19 +48,20 @@ class DKProScriptBaseTest {
         script = aName;
     }
     
-    private String oldModelCache;
-    private String oldGrapeCache;
+    private static String oldModelCache;
+    private static String oldGrapeCache;
     
-    @Before
-    public void setup()
+    @BeforeClass
+    public static void before()
     {
+        System.setProperty("groovy.grape.report.downloads", "true");
         oldModelCache = System.setProperty("dkpro.model.repository.cache", 
             "target/test-output/models");
-        oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
+        //oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
     }
 
-    @Before
-    public void after()
+    @AfterClass
+    public static void after()
     {
         if (oldModelCache != null) {
             System.setProperty("dkpro.model.repository.cache", oldModelCache);
@@ -78,7 +82,7 @@ class DKProScriptBaseTest {
     {
         // If we have an "output.txt" file next to the script, we capture stdout and compare
         // it to the file's contents
-        runTest(script, new File("src/test/resources/${script}/output.txt").exists());
+        runTest(script, new File("src/test/resources/DKProScriptBase/${script}/output.txt").exists());
     }
     
     public void runTest(String aName, boolean aCaptureStdOut) {
@@ -96,11 +100,11 @@ class DKProScriptBaseTest {
             CompilerConfiguration cc = new CompilerConfiguration();
             cc.setScriptBaseClass(DKProCoreScript.name);
     
-            def base = new File("src/test/resources/${aName}").toURI().toURL().toString();
+            def base = new File("src/test/resources/DKProScriptBase/${aName}").toURI().toURL().toString();
     
             // Create a GroovyClassLoader explicitly here so that Grape can work in the script
             GroovyClassLoader gcl = new GroovyClassLoader(this.getClass().getClassLoader(), cc);
-            GroovyScriptEngine engine = new GroovyScriptEngine("src/test/resources/${aName}", gcl);
+            GroovyScriptEngine engine = new GroovyScriptEngine("src/test/resources/DKProScriptBase/${aName}", gcl);
             engine.setConfig(cc);
     
             Binding binding = new Binding();
@@ -122,12 +126,12 @@ class DKProScriptBaseTest {
         // Compare captured output
         if (aCaptureStdOut) {
             assertEquals(
-                new File("src/test/resources/${aName}/output.txt").getText('UTF-8').trim(),
+                new File("src/test/resources/DKProScriptBase/${aName}/output.txt").getText('UTF-8').trim(),
                 capturedOut.toString('UTF-8').trim());
         }
         // Compare file-based output
         else {
-            File referenceDir = new File("src/test/resources/${aName}/output");
+            File referenceDir = new File("src/test/resources/DKProScriptBase/${aName}/output");
             referenceDir.eachFileRecurse(FileType.FILES, { referenceFile ->
                 String relPath = referenceFile.absolutePath.substring(referenceDir.absolutePath.length());
                 File actualFile = new File("target/test-output/${aName}/${relPath}");
