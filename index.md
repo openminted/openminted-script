@@ -27,9 +27,9 @@ import groovy.transform.BaseScript
 import org.dkpro.script.groovy.DKProCoreScript;
 @BaseScript DKProCoreScript baseScript
 
-version '1.8.0-SNAPSHOT'
+version '1.9.0-SNAPSHOT'
 
-read 'String' language 'de' params([
+read 'String' language 'en' params([
     documentText: 'This is a test.'])
 apply 'OpenNlpSegmenter'
 apply 'OpenNlpPosTagger'
@@ -40,7 +40,7 @@ write 'Conll2006'
 {% assign stable = (site.data.releases | where:"status", "stable" | first) %}
 {% assign unstable = (site.data.releases | where:"status", "unstable" | first) %}
 
-{% unless unstable.user_guide_url == null %} For more information, please refer to the [User Guide]({{ unstable.user_guide_url }}).{% endunless %}
+{% unless unstable.user_guide_url == null %} For more information, please refer to the [User Guide]({{ unstable.user_guide_url }}). DKPro Script requires at least Groovy 2.4.5.{% endunless %}
 
 How to cite
 -----------
