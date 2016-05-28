@@ -1,4 +1,4 @@
-version "1.8.0-SNAPSHOT"
+version "1.9.0-SNAPSHOT"
 
 read 'String' language 'en' params([
   documentText: 'This is a test.'])
