@@ -14,11 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
     
-= DKPro Script™ User Guide and Reference
-:Author: The DKPro Script Team
+= OpenMinTeD Script™ User Guide and Reference
+:Author: The OpenMinTeD Script Team
 :toc-title: User Guide
 
-The document targets users employing the DKPro Script to build analysis pipelines.
+The document targets users employing the OpenMinTeD Script to build analysis pipelines.
 
 include::{include-dir}introduction.adoc[]
 

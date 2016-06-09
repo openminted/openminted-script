@@ -15,13 +15,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ****************************************************************************
-package org.dkpro.script.groovy;
+package eu.openminted.script.groovy;
 
-import org.dkpro.script.groovy.internal.EngineHelper;
-import org.dkpro.script.groovy.internal.PipelineContext;
-import org.dkpro.script.groovy.internal.PipelineHelper;
-import org.dkpro.script.groovy.internal.WriterHelper;
-import org.dkpro.script.groovy.internal.Helper;
+import eu.openminted.script.groovy.internal.EngineHelper;
+import eu.openminted.script.groovy.internal.PipelineContext;
+import eu.openminted.script.groovy.internal.PipelineHelper;
+import eu.openminted.script.groovy.internal.WriterHelper;
+import eu.openminted.script.groovy.internal.Helper;
 
 import static org.apache.uima.fit.factory.TypeSystemDescriptionFactory.*;
 import static org.apache.uima.fit.pipeline.SimplePipeline.*;
@@ -29,7 +29,7 @@ import static org.apache.uima.fit.pipeline.SimplePipeline.*;
 import org.apache.uima.collection.CollectionReaderDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 
-abstract class DKProCoreScript extends DelegatingScript {
+abstract class ScriptBase extends DelegatingScript {
     abstract void scriptBody()
 
     def run() {

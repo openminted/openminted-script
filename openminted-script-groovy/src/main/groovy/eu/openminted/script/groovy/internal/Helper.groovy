@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ****************************************************************************
-package org.dkpro.script.groovy.internal
+package eu.openminted.script.groovy.internal
 
 class Helper {
     static def argsToClassses(java.util.Collection args) {

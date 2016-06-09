@@ -1,4 +1,4 @@
-package org.dkpro.script.groovy.external
+package eu.openminted.script.groovy.external
 import static groovy.io.FileType.FILES;
 import groovy.json.*;
 import groovy.transform.Field;

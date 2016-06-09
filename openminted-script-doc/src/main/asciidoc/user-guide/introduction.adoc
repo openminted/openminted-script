@@ -18,18 +18,18 @@
 
 == Introduction
 
-DKPro Script is a domain specific language (DSL) based on Groovy that greatly facilitates building
-pipelines using DKPro Core components.
+OpenMinTeD Script is a domain specific language (DSL) based on Groovy that greatly facilitates building
+pipelines using NLP components.
 
 == Script structure
 
-The script starts with a mandatory preamble that sets up the DKPro Script environment:
+The script starts with a mandatory preamble that sets up the OpenMinTeD Script environment:
 
 [source,groovy,subs="+attributes"]
 ----
 #!/usr/bin/env groovy
-@Grab('org.dkpro.script:dkpro-script-groovy:{revnumber}')
-@groovy.transform.BaseScript org.dkpro.script.groovy.DKProCoreScript baseScript
+@Grab('eu.openminted.script:openminted-script-groovy:{revnumber}')
+@groovy.transform.BaseScript eu.openminted.script.groovy.ScriptBase baseScript
 ----
 
 After the preamble follows the actual script. There are three main commands `read`, `apply`, and 
@@ -133,7 +133,7 @@ write '<FORMAT>' to '<LOCATION>' params ([
   `inventory` command.
 `to <LOCATION>` (optional)::
   the location to write the output to. If this is omitted, most writers will write their output
-  output to standard out (if using DKPro Core 1.8.0 or higher). Most format will treat the location
+  output to standard out. Most format will treat the location
   as a target folder and for each input file, they create an output file in this folder. For some
   formats, the location specifies a file name. This is a shortcut for specifying `targetLocation` in
   `params`. 
@@ -206,7 +206,7 @@ version '1.8.0-SNAPSHOT'
 
 === Readers
 
-If a format should be processed that is not supported by DKPro Core yet, a custom reader can be
+If a format should be processed that is not supported yet, a custom reader can be
 defined within the script. 
 
 [source,groovy,subs="+attributes"]
