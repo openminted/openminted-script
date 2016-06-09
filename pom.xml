@@ -23,17 +23,17 @@
     <artifactId>dkpro-parent-pom</artifactId>
     <version>14</version>
   </parent>
-  <groupId>org.dkpro.script</groupId>
-  <artifactId>dkpro-script</artifactId>
+  <groupId>eu.openminted.script</groupId>
+  <artifactId>openminted-script</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>DKPro Script</name>
+  <name>OpenMinTeD Script</name>
   <packaging>pom</packaging>
   <properties>
     <groovy.version>2.4.5</groovy.version>
   </properties>
   <modules>
-    <module>dkpro-script-groovy</module>
-    <module>dkpro-script-doc</module>
+    <module>openminted-script-groovy</module>
+    <module>openminted-script-doc</module>
   </modules>
   <dependencyManagement>
     <dependencies>
