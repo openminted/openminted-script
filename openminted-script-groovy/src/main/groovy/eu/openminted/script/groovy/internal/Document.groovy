@@ -16,33 +16,7 @@
 // ****************************************************************************
 package eu.openminted.script.groovy.internal
 
-import org.apache.uima.fit.factory.ConfigurationParameterFactory;
-
-class Component {
-    String name;
-    String framework;
-    def offer;
-    def impl;
-    def desc;
-    ComponentRole role;
-    Map parameters = [:];
-
-    def params(map) {
-        map.each { k, v ->
-            parameters[k] = v;
-        }
-        return this;
-    }
-
-    def language(lang) {
-        params(['language': lang]);         
-    }
-
-    def from(location) {
-        params(['sourceLocation': location]);           
-    }
-
-    def to(location) {
-        params(['targetLocation': location]);           
-    }
+class Document
+{
+    def data;
 }

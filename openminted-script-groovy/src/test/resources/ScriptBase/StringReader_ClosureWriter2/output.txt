@@ -1,5 +1,0 @@
-This DT
-is VBZ
-a DT
-test NN
-. .

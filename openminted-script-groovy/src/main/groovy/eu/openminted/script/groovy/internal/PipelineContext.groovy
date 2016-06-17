@@ -1,7 +1,6 @@
 // ****************************************************************************
-// Copyright 2016
-// Ubiquitous Knowledge Processing (UKP) Lab
-// Technische Universität Darmstadt
+// See the NOTICE.txt file distributed with this work for additional information
+// regarding copyright ownership.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,29 +16,26 @@
 // ****************************************************************************
 package eu.openminted.script.groovy.internal
 
-import groovy.grape.Grape;
-import groovy.json.*;
-
-import static org.apache.uima.fit.factory.AnalysisEngineFactory.*;
-import static org.apache.uima.fit.factory.CollectionReaderFactory.*;
+import static org.apache.uima.fit.factory.AnalysisEngineFactory.*
+import static org.apache.uima.fit.factory.CollectionReaderFactory.*
+import eu.openminted.script.groovy.internal.gate.GateLoader
+import eu.openminted.script.groovy.internal.uima.UimaLoader
+import groovy.grape.Grape
+import groovy.json.*
 
 class PipelineContext
 {
-	def pipeline = [];
+	List<Component> pipeline = [];
 
-	def engines;
-
-	def formats;
-
-	def VERSION = '1.7.0';
+    List<ComponentOffer> registry = [];
+    
+    Map<String, Loader> frameworks = [
+        uima: new UimaLoader(this),
+        gate: new GateLoader(this)];
 
 	Script scriptContext;
 
 	ClassLoader classLoader;
-
-	def version(ver) {
-		VERSION = ver;
-	}
 
 	def boot() {
 		java.util.logging.LogManager.logManager.reset(); // Disable logging
@@ -50,62 +46,69 @@ class PipelineContext
 		 }
 		 */
 
-		//		engines = new JsonSlurper().parseText(new URL(
-		//				'https://gist.githubusercontent.com/reckart/990d75ee230dbb39c30b/raw/ad29ba37ebb77e3f5f9f47fb32c3def15c63954c/engines.json').text);
-		engines = new JsonSlurper().parse(new File("src/main/resources/PipelineContextJSON/engines.json"));
-		//		formats = new JsonSlurper().parseText(new URL(
-		//				'https://gist.githubusercontent.com/reckart/990d75ee230dbb39c30b/raw/75b9c10c74454c18b8507aed041b20b6e1322a84/formats.json').text);
-		formats  = new JsonSlurper().parse(new File("src/main/resources/PipelineContextJSON/formats.json"));
+		def engines = new JsonSlurper().parse(new File("src/main/resources/PipelineContextJSON/engines.json"));
+        
+        engines.each { k, v ->
+            ComponentOffer offer = new ComponentOffer();
+            offer.groupId = v.groupId;
+            offer.artifactId = v.artifactId;
+            offer.version = v.version;
+            offer.name = k;
+            offer.implName = v["class"];
+            offer.framework = "uima";
+            offer.role = ComponentRole.PROCESSOR;
+            registry.add(offer);
+        }
+        
+		def formats  = new JsonSlurper().parse(new File("src/main/resources/PipelineContextJSON/formats.json"));
+        
+        formats.each { k, v ->
+            if (v.readerClass) {
+                ComponentOffer offer = new ComponentOffer();
+                offer.groupId = v.groupId;
+                offer.artifactId = v.artifactId;
+                offer.version = v.version;
+                offer.name = k;
+                offer.implName = v["readerClass"];
+                offer.framework = "uima";
+                offer.role = ComponentRole.READER;
+                registry.add(offer);
+            }
+
+            if (v.writerClass) {
+                ComponentOffer offer = new ComponentOffer();
+                offer.groupId = v.groupId;
+                offer.artifactId = v.artifactId;
+                offer.version = v.version;
+                offer.name = k;
+                offer.implName = v["writerClass"];
+                offer.framework = "uima";
+                offer.role = ComponentRole.WRITER;
+                registry.add(offer);
+            }
+        }
 	}
 
-	def lazyBootComplete = false;
-
-	// Thinks to initialize while the script is running, e.g. if we want to change the versio in
-	// the script, then we cannot configure the resolved before
-	def lazyBoot() {
-		if (!lazyBootComplete) {
-			if (VERSION.endsWith('-SNAPSHOT')) {
-				Grape.addResolver(
-						name:'ukp-oss-snapshots',
-						root:'http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots')
-			}
-
-			lazyBootComplete = true;
-		}
-	}
-
-	def load(component) {
-		lazyBoot();
-
+	def load(component, ComponentRole role) {
 		def cl = findClassLoader();
-		def desc;
 		def impl;
-		if (component.endsWith("Reader")) {
-			def format = formats[component[0..-7]];
-			Grape.grab(group:format.groupId, module:format.artifactId, version: VERSION,
-			classLoader: cl);
-			impl = cl.loadClass(format.readerClass, true, false);
-			desc = createReaderDescription(impl);
-		}
-		else if (component.endsWith("Writer")) {
-			def format = formats[component[0..-7]];
-			Grape.grab(group:format.groupId, module:format.artifactId, version: VERSION,
-			classLoader: cl);
-			impl = cl.loadClass(format.writerClass, true, false);
-			desc = createEngineDescription(impl);
-		}
-		else {
-			def engine = engines[component];
-			Grape.grab(group:engine.groupId, module:engine.artifactId, version: VERSION,
-			classLoader: findClassLoader());
-			impl = cl.loadClass(engine.class, true, false);
-			desc = createEngineDescription(impl);
-		}
 
-		def comp = new Component();
-		comp.name = component;
-		comp.desc = desc;
-		comp.impl = impl;
+        Component comp;
+        
+        if (component instanceof String || format instanceof GString) {
+            // Look up component in registry
+            ComponentOffer offer = registry.find { it ->
+                it.role == role && it.name == component;
+            }
+            
+            if (!offer) {
+                throw new IllegalArgumentException("Unable to find $component as $role");
+            }
+            
+            Loader loader = frameworks[offer.framework];
+            comp = loader.load(offer);
+        }
+        
 		return comp;
 	}
 

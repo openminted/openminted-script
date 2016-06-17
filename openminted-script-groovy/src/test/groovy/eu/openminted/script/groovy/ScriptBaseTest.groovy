@@ -1,7 +1,6 @@
 // ****************************************************************************
-// Copyright 2015
-// Ubiquitous Knowledge Processing (UKP) Lab
-// Technische Universität Darmstadt
+// See the NOTICE.txt file distributed with this work for additional information
+// regarding copyright ownership.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,7 +58,7 @@ class ScriptBaseTest {
         System.setProperty("groovy.grape.report.downloads", "true");
         oldModelCache = System.setProperty("dkpro.model.repository.cache", 
             "target/test-output/models");
-        //oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
+       oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
     }
 
     @AfterClass
@@ -119,9 +118,10 @@ class ScriptBaseTest {
             if (aCaptureStdOut) {
                 // System.err.println "Capturing complete.";
                 System.setOut(originalOut);
-            }
-            if (error) {
-                System.out.println(capturedOut.toString('UTF-8'));
+                
+                if (error) {
+                    System.out.println(capturedOut.toString('UTF-8'));
+                }
             }
         }
         

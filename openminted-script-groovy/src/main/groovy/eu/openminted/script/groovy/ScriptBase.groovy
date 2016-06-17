@@ -1,14 +1,13 @@
 // ****************************************************************************
-// Copyright 2015
-// Ubiquitous Knowledge Processing (UKP) Lab
-// Technische Universität Darmstadt
-// 
+// See the NOTICE.txt file distributed with this work for additional information
+// regarding copyright ownership.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,10 +16,13 @@
 // ****************************************************************************
 package eu.openminted.script.groovy;
 
-import eu.openminted.script.groovy.internal.EngineHelper;
-import eu.openminted.script.groovy.internal.PipelineContext;
-import eu.openminted.script.groovy.internal.PipelineHelper;
-import eu.openminted.script.groovy.internal.WriterHelper;
+import eu.openminted.script.groovy.internal.PipelineContext
+import eu.openminted.script.groovy.internal.dsl.EngineHelper;
+import eu.openminted.script.groovy.internal.dsl.PipelineHelper;
+import eu.openminted.script.groovy.internal.dsl.WriterHelper
+import eu.openminted.script.groovy.internal.ComponentInstance
+import eu.openminted.script.groovy.internal.ComponentRole;
+import eu.openminted.script.groovy.internal.Document;
 import eu.openminted.script.groovy.internal.Helper;
 
 import static org.apache.uima.fit.factory.TypeSystemDescriptionFactory.*;
@@ -54,19 +56,34 @@ abstract class ScriptBase extends DelegatingScript {
             scriptBody();
             
             if (!context.pipeline.empty) {
-                // Force re-scan of type systems because we dynamically add JARs to the
-                // classpath using grape - failure to do so will cause some types not to
-                // be detected when the pipeline is actually run
-                forceTypeDescriptorsScan();
-                def ts = createTypeSystemDescription();
+                assert context.pipeline.get(0).role == ComponentRole.READER;
                 
-                // runpipeline constructs the type system from the descriptors passed to
-                // it - make sure at least one of the components actually has the full
-                // type system
-                context.pipeline[0].desc.collectionReaderMetaData.typeSystem = ts;
-                runPipeline(
-                    context.pipeline[0].desc as CollectionReaderDescription, 
-                    context.pipeline[1..-1].collect { it.desc } as AnalysisEngineDescription[]);
+                List<ComponentInstance> componentInstances = [];
+                
+                // Create/initialized component instances
+                context.pipeline.each { component ->
+                    componentInstances.add(context.frameworks[component.framework].create(component));
+                } 
+                
+                // Create document
+                Document doc = new Document();
+                
+                // First document
+                componentInstances[0].process(doc);
+                while (doc.data != null) {
+                    // Process current document
+                    componentInstances[1..-1].each {
+                        it.process(doc);
+                    }
+                    
+                    // Next document
+                    componentInstances[0].process(doc);
+                }
+                
+                // Destroy instances
+                componentInstances.each {
+                    it.destroy();
+                }
             }
         }
         finally {

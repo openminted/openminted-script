@@ -14,35 +14,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ****************************************************************************
-package eu.openminted.script.groovy.internal
+package eu.openminted.script.groovy.internal;
 
-import org.apache.uima.fit.factory.ConfigurationParameterFactory;
-
-class Component {
+public class ComponentOffer
+{
+    String groupId;
+    String artifactId;
+    String version;
     String name;
+    String implName;
     String framework;
-    def offer;
-    def impl;
-    def desc;
     ComponentRole role;
-    Map parameters = [:];
-
-    def params(map) {
-        map.each { k, v ->
-            parameters[k] = v;
-        }
-        return this;
-    }
-
-    def language(lang) {
-        params(['language': lang]);         
-    }
-
-    def from(location) {
-        params(['sourceLocation': location]);           
-    }
-
-    def to(location) {
-        params(['targetLocation': location]);           
-    }
 }
