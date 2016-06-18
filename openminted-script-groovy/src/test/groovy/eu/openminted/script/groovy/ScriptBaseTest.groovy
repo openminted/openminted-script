@@ -38,7 +38,7 @@ class ScriptBaseTest {
         def dirs = [];
         new File("src/test/resources/ScriptBase").eachDir({ dirs << ([ it.name ] as Object[]) });
         // Uncomment below and enter the name of one or more tests to run these specifically.
-        // dirs = [ ["ExplainTextFormat"] as Object[] ];
+         dirs = [ ["GateTest"] as Object[] ];
         return dirs;
     }
     

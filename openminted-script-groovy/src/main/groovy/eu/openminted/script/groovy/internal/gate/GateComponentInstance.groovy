@@ -16,10 +16,15 @@
 // ****************************************************************************
 package eu.openminted.script.groovy.internal.gate
 
+import org.apache.uima.cas.CAS
 import org.apache.uima.fit.factory.ConfigurationParameterFactory
+import org.apache.uima.jcas.JCas
+import org.apache.uima.fit.factory.TypeSystemDescriptionFactory;
+import org.apache.uima.fit.factory.JCasFactory
 
 import eu.openminted.script.groovy.internal.Component
 import eu.openminted.script.groovy.internal.ComponentInstance
+import eu.openminted.script.groovy.internal.ConvertToGate;
 import eu.openminted.script.groovy.internal.Document;
 import gate.Factory
 import gate.FeatureMap;
@@ -40,7 +45,22 @@ class GateComponentInstance implements ComponentInstance {
     @Override
     def process(Document document)
     {
-        if (!(document.data instanceof gate.Document)) {
+		
+		if(!(document.data instanceof gate.Document)){
+			ConvertToGate conGate = new ConvertToGate();
+			CAS cas = null;
+			
+			if (document.data instanceof CAS) {
+				cas = document.data;
+			}
+			else if (document.data instanceof JCas) {
+				cas = ((JCas) document.data).getCas();
+			}
+			document.data = conGate.convert(cas.getJCas());
+		}
+        
+		//still not instanceof gate.document
+		if (!(document.data instanceof gate.Document)) {
             throw new IllegalArgumentException("Cannot process $document");
         }
         

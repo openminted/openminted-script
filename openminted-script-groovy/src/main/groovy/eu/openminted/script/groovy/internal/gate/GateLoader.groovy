@@ -18,10 +18,11 @@ package eu.openminted.script.groovy.internal.gate
 
 import eu.openminted.script.groovy.internal.Component
 import eu.openminted.script.groovy.internal.ComponentOffer
-import eu.openminted.script.groovy.internal.Loader;
+import eu.openminted.script.groovy.internal.Loader
 import eu.openminted.script.groovy.internal.PipelineContext
 import gate.Gate
 import gate.Plugin
+import groovy.grape.Grape
 
 class GateLoader implements Loader {
     PipelineContext context;
@@ -35,10 +36,18 @@ class GateLoader implements Loader {
     }
     
     Component load(ComponentOffer offer) {
+		Grape.addResolver(
+			name:'ukp-oss-snapshots',
+			root:'http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots')
+		ClassLoader cl = context.findClassLoader();
+		Grape.grab(group:'uk.ac.gate', module:'gate-core', version: '9.0-SNAPSHOT',
+			classLoader: cl);
+		
         // load the plugin via Maven
+		
         Plugin plugin = new Plugin.Maven(offer.groupId, offer.artifactId, offer.version);
         Gate.getCreoleRegister().registerPlugin(plugin);
-
+		
         def comp = new Component();
         comp.name = offer.name;
         comp.desc = null;

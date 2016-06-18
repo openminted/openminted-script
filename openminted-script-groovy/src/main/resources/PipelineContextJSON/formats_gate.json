@@ -1,0 +1,8 @@
+{
+    "GateXMLExporter": {
+        "groupId": "uk.ac.gate",
+        "artifactId": "gate-core",
+        "version": "9.0-SNAPSHOT",
+        "writerClass": "gate.corpora.export.GateXMLExporter"
+    }
+}

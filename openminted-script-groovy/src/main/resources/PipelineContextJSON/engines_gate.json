@@ -1,0 +1,9 @@
+{
+    "POSTagger": {
+        "name": "POSTagger",
+        "groupId": "uk.ac.gate.plugins",
+        "artifactId": "annie",
+        "version": "9.0-SNAPSHOT",
+        "class": "gate.creole.POSTagger"
+    }
+}

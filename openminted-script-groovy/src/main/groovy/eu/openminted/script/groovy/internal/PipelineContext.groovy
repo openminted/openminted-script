@@ -20,11 +20,10 @@ import static org.apache.uima.fit.factory.AnalysisEngineFactory.*
 import static org.apache.uima.fit.factory.CollectionReaderFactory.*
 import eu.openminted.script.groovy.internal.gate.GateLoader
 import eu.openminted.script.groovy.internal.uima.UimaLoader
-import groovy.grape.Grape
 import groovy.json.*
 
 class PipelineContext
-{
+{	
 	List<Component> pipeline = [];
 
     List<ComponentOffer> registry = [];
@@ -46,47 +45,60 @@ class PipelineContext
 		 }
 		 */
 
-		def engines = new JsonSlurper().parse(new File("src/main/resources/PipelineContextJSON/engines.json"));
+//		def engines = new JsonSlurper().parse(new File("src/main/resources/PipelineContextJSON/engines.json"));
+		new File("src/main/resources/PipelineContextJSON").listFiles().each{ file->
+			if(file.getName().startsWith("engines")){
+				def engines = new JsonSlurper().parse(file);				
+				engines.each { k, v ->
+					ComponentOffer offer = new ComponentOffer();
+					def framework = v.groupId.contains("dkpro")?"uima":"gate";
+					offer.groupId = v.groupId;
+					offer.artifactId = v.artifactId;
+					offer.version = v.version;
+					offer.name = k;
+					offer.implName = v["class"];					
+					offer.framework = framework;
+					offer.role = ComponentRole.PROCESSOR;
+					registry.add(offer);
+				}
+			}
+			if(file.getName().startsWith("formats")){
+				def formats  = new JsonSlurper().parse(file);
+				formats.each { k, v ->
+					if (v.readerClass) {
+						ComponentOffer offer = new ComponentOffer();
+						def framework = v.groupId.contains("dkpro")?"uima":"gate";						
+						offer.groupId = v.groupId;
+						offer.artifactId = v.artifactId;
+						offer.version = v.version;
+						offer.name = k;
+						offer.implName = v["readerClass"];
+						offer.framework = framework;
+						offer.role = ComponentRole.READER;
+						registry.add(offer);
+					}
+		
+					if (v.writerClass) {
+						ComponentOffer offer = new ComponentOffer();
+						def framework = v.groupId.contains("dkpro")?"uima":"gate";
+						offer.groupId = v.groupId;
+						offer.artifactId = v.artifactId;
+						offer.version = v.version;
+						offer.name = k;
+						offer.implName = v["writerClass"];
+						offer.framework = framework;
+						offer.role = ComponentRole.WRITER;
+						registry.add(offer);
+					}
+				}
+			}
+		}
+//		def temp = new File("src/main/resources/PipelineContextJSON/temp");
+//		registry.each {
+//			temp << it.artifactId +"--"+ it.framework +"\n"
+//		}
+      
         
-        engines.each { k, v ->
-            ComponentOffer offer = new ComponentOffer();
-            offer.groupId = v.groupId;
-            offer.artifactId = v.artifactId;
-            offer.version = v.version;
-            offer.name = k;
-            offer.implName = v["class"];
-            offer.framework = "uima";
-            offer.role = ComponentRole.PROCESSOR;
-            registry.add(offer);
-        }
-        
-		def formats  = new JsonSlurper().parse(new File("src/main/resources/PipelineContextJSON/formats.json"));
-        
-        formats.each { k, v ->
-            if (v.readerClass) {
-                ComponentOffer offer = new ComponentOffer();
-                offer.groupId = v.groupId;
-                offer.artifactId = v.artifactId;
-                offer.version = v.version;
-                offer.name = k;
-                offer.implName = v["readerClass"];
-                offer.framework = "uima";
-                offer.role = ComponentRole.READER;
-                registry.add(offer);
-            }
-
-            if (v.writerClass) {
-                ComponentOffer offer = new ComponentOffer();
-                offer.groupId = v.groupId;
-                offer.artifactId = v.artifactId;
-                offer.version = v.version;
-                offer.name = k;
-                offer.implName = v["writerClass"];
-                offer.framework = "uima";
-                offer.role = ComponentRole.WRITER;
-                registry.add(offer);
-            }
-        }
 	}
 
 	def load(component, ComponentRole role) {
