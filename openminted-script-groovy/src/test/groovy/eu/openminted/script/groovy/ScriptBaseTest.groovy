@@ -19,16 +19,19 @@ package eu.openminted.script.groovy
 import static org.junit.Assert.*
 import groovy.io.FileType
 
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory;
+import org.apache.ivy.util.DefaultMessageLogger
+import org.apache.ivy.util.Message
 import org.codehaus.groovy.control.CompilerConfiguration
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.AfterClass
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
 
-import eu.openminted.script.groovy.ScriptBase;
+import de.tudarmstadt.ukp.dkpro.core.api.resources.internal.ApacheCommonsLoggingAdapter;
 
 @RunWith(value = Parameterized.class)
 class ScriptBaseTest {
@@ -41,6 +44,8 @@ class ScriptBaseTest {
          dirs = [ ["GateTest"] as Object[] ];
         return dirs;
     }
+    
+    private static Log LOG = LogFactory.getLog("scriptbase.ivy");
     
     private String script;
     
@@ -55,10 +60,27 @@ class ScriptBaseTest {
     @BeforeClass
     public static void before()
     {
-        System.setProperty("groovy.grape.report.downloads", "true");
-        oldModelCache = System.setProperty("dkpro.model.repository.cache", 
-            "target/test-output/models");
-       oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
+        // Yank up ivy debugging for dependency downloading
+        //Message.setDefaultLogger(new DefaultMessageLogger(Message.MSG_DEBUG))
+//        Message.setDefaultLogger(new ApacheCommonsLoggingAdapter(LOG));
+//        
+//        System.setProperty("ivy.message.logger.level", String.valueOf(Message.MSG_DEBUG));
+//        System.setProperty("groovy.grape.report.downloads", "true");
+
+//        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+//        System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
+//        
+//        // httpclient 4.x
+//        System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http", "DEBUG");
+//        System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.wire", "ERROR");
+//        
+//        // httpclient 3.x
+//        System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire.header", "debug");
+//        System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "debug");
+        
+        oldModelCache = System.setProperty("dkpro.model.repository.cache",
+                "target/test-output/models");
+        oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
     }
 
     @AfterClass
