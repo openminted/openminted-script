@@ -16,6 +16,10 @@
 // ****************************************************************************
 package eu.openminted.script.groovy.internal.gate
 
+import org.apache.ivy.util.DefaultMessageLogger;
+import org.apache.ivy.util.Message
+import org.apache.ivy.util.MessageLogger;
+
 import eu.openminted.script.groovy.internal.Component
 import eu.openminted.script.groovy.internal.ComponentOffer
 import eu.openminted.script.groovy.internal.Loader
@@ -30,8 +34,14 @@ class GateLoader implements Loader {
     GateLoader(PipelineContext aContext) {
         context = aContext;
         if (!Gate.isInitialised()) {
+            // Save logger because Gate replaces it
+            MessageLogger logger = Message.getDefaultLogger();
+            
             // must be called before you can do anything with the GATE API
             Gate.init();
+            
+            // Restore logger
+            Message.setDefaultLogger(logger);
         }
     }
     
