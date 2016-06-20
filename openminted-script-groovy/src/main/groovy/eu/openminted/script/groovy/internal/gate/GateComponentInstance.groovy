@@ -44,28 +44,28 @@ class GateComponentInstance implements ComponentInstance {
 
     @Override
     def process(Document document)
-    {
-		
-		if(!(document.data instanceof gate.Document)){
+    {		
+		Document docForGate = new Document();
+		if(!(document.data instanceof gate.Document)){			
 			ConvertToGate conGate = new ConvertToGate();
-			CAS cas = null;
-			
+			CAS cas = null;			
 			if (document.data instanceof CAS) {
 				cas = document.data;
 			}
 			else if (document.data instanceof JCas) {
 				cas = ((JCas) document.data).getCas();
 			}
-			document.data = conGate.convert(cas.getJCas());
+			docForGate.data = conGate.convert(cas.getJCas());
 		}
         
 		//still not instanceof gate.document
-		if (!(document.data instanceof gate.Document)) {
+		if (!(docForGate.data instanceof gate.Document)) {
             throw new IllegalArgumentException("Cannot process $document");
         }
         
-        delegate.setDocument(document.data);
+        delegate.setDocument(docForGate.data);
         delegate.execute();
+		
     }
 
     @Override

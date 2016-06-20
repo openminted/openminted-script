@@ -58,7 +58,8 @@ public class ConvertToGate {
 				annSet.add(Long.valueOf(s.getBegin()), Long.valueOf(s.getEnd()), "Sentence", fm);
 			}
 			else {
-				System.out.printf("Don't know how to handle type: %s%n", fs.getType().getName());
+				
+				System.err.printf("Don't know how to handle type: %s%n", fs.getType().getName());
 			}
 
 			processed.add(fs.getAddress());
