@@ -20,6 +20,7 @@ import eu.openminted.script.groovy.internal.PipelineContext
 import eu.openminted.script.groovy.internal.dsl.EngineHelper;
 import eu.openminted.script.groovy.internal.dsl.PipelineHelper;
 import eu.openminted.script.groovy.internal.dsl.WriterHelper
+import eu.openminted.script.groovy.internal.utils.Utils;
 import eu.openminted.script.groovy.internal.ComponentInstance
 import eu.openminted.script.groovy.internal.ComponentRole;
 import eu.openminted.script.groovy.internal.Document;
@@ -72,8 +73,12 @@ abstract class ScriptBase extends DelegatingScript {
                 componentInstances[0].process(doc);
                 while (doc.data != null) {
                     // Process current document
-                    componentInstances[1..-1].each {
+                    componentInstances.eachWithIndex { it,idx ->
+						if(idx!=0){												
+						//convert the document according to previous framework and current framework
+						doc = Utils.convertDocumentFramework(doc,componentInstances[idx==1?1:idx-1],componentInstances[idx]); 
                         it.process(doc);
+						}
                     }
                     
                     // Next document

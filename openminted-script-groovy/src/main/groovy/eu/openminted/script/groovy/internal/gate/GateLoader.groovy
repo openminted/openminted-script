@@ -29,48 +29,47 @@ import gate.Plugin
 import groovy.grape.Grape
 
 class GateLoader implements Loader {
-    PipelineContext context;
+	PipelineContext context;
 
-    GateLoader(PipelineContext aContext) {
-        context = aContext;
-        if (!Gate.isInitialised()) {
-            // Save logger because Gate replaces it
-            MessageLogger logger = Message.getDefaultLogger();
-            
-            // must be called before you can do anything with the GATE API
-            Gate.init();
-            
-            // Restore logger
-            Message.setDefaultLogger(logger);
-        }
-    }
-    
-    Component load(ComponentOffer offer) {
+	GateLoader(PipelineContext aContext) {
+		context = aContext;
+		if (!Gate.isInitialised()) {
+			// Save logger because Gate replaces it
+			MessageLogger logger = Message.getDefaultLogger();
+
+			// must be called before you can do anything with the GATE API
+			Gate.init();
+
+			// Restore logger
+			Message.setDefaultLogger(logger);
+		}
+	}
+
+	Component load(ComponentOffer offer) {
 		Grape.addResolver(
-			name:'ukp-oss-snapshots',
-			root:'http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots')
+				name:'ukp-oss-snapshots',
+				root:'http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots')
 		ClassLoader cl = context.findClassLoader();
-		Grape.grab(group:'uk.ac.gate', module:'gate-core', version: '9.0-SNAPSHOT',
-			classLoader: cl);
-		
-        // load the plugin via Maven
-		
-        Plugin plugin = new Plugin.Maven(offer.groupId, offer.artifactId, offer.version);
-        Gate.getCreoleRegister().registerPlugin(plugin);
-		
-        def comp = new Component();
-        comp.name = offer.name;
-        comp.desc = null;
-        comp.impl = offer.implName;
-        comp.offer = offer;
-        comp.role = offer.role;
-        comp.framework = offer.framework;
-        return comp;
-    }
-    
-    GateComponentInstance create(Component component) {
-        GateComponentInstance instance = new GateComponentInstance();
-        instance.init(component);
-        return instance;
-    }
+
+		// load the plugin via Maven
+		if(!offer.artifactId.equals("gate-core"))
+		{
+			Plugin plugin = new Plugin.Maven(offer.groupId, offer.artifactId, offer.version);
+			Gate.getCreoleRegister().registerPlugin(plugin);
+		}
+		def comp = new Component();
+		comp.name = offer.name;
+		comp.desc = null;
+		comp.impl = offer.implName;
+		comp.offer = offer;
+		comp.role = offer.role;
+		comp.framework = offer.framework;
+		return comp;
+	}
+
+	GateComponentInstance create(Component component) {
+		GateComponentInstance instance = new GateComponentInstance();
+		instance.init(component);
+		return instance;
+	}
 }

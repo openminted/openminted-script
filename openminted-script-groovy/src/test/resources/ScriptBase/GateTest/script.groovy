@@ -4,4 +4,5 @@ read 'String' language 'en' params([
 apply 'BreakIteratorSegmenter'
 
 apply 'POSTagger'
-write 'Text' 
+
+write 'GateXMLExporter'

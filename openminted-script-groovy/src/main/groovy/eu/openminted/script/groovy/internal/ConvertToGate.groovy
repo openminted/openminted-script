@@ -1,6 +1,9 @@
 package eu.openminted.script.groovy.internal
 
-import static org.apache.uima.fit.util.JCasUtil.selectAll;
+
+
+import org.apache.uima.cas.CAS;
+import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.cas.TOP;
 import de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS;
@@ -17,7 +20,20 @@ import gate.util.SimpleFeatureMapImpl;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 
 public class ConvertToGate {
-	public Document convert(JCas aJCas) throws GateException {
+	public Document convert(def aJCas) throws GateException {
+		
+		CAS cas = null;
+		if (aJCas instanceof CAS) {
+			cas = aJCas;
+		}
+		else if (aJCas instanceof JCas) {
+			cas = ((JCas) aJCas).getCas();
+		} else{
+			System.err.println("Input is not a UIMA cas");
+			return null;
+		}
+		aJCas = cas.getJCas();
+		
 		IntOpenHashSet processed = new IntOpenHashSet();
 
 		Document document = new DocumentImpl();
@@ -25,7 +41,7 @@ public class ConvertToGate {
 
 		AnnotationSet annSet = document.getAnnotations();
 
-		for (TOP fs : selectAll(aJCas)) {
+		for (TOP fs : JCasUtil.selectAll(aJCas)) {
 			if (processed.contains(fs.getAddress())) {
 				continue;
 			}

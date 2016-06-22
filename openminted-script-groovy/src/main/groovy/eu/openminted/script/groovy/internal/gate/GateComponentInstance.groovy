@@ -24,53 +24,51 @@ import org.apache.uima.fit.factory.JCasFactory
 
 import eu.openminted.script.groovy.internal.Component
 import eu.openminted.script.groovy.internal.ComponentInstance
+import eu.openminted.script.groovy.internal.ComponentRole;
 import eu.openminted.script.groovy.internal.ConvertToGate;
-import eu.openminted.script.groovy.internal.Document;
+import eu.openminted.script.groovy.internal.Document
+import gate.DocumentExporter;
 import gate.Factory
 import gate.FeatureMap;
 import gate.Gate;
 import gate.LanguageAnalyser
 import gate.Plugin
+import gate.corpora.export.GateXMLExporter;
 import gate.util.SimpleFeatureMapImpl;;
 
 class GateComponentInstance implements ComponentInstance {
-    private LanguageAnalyser delegate;
-    
-    def init(Component decl) {
-        FeatureMap fm = new SimpleFeatureMapImpl();
-        fm.putAll(decl.parameters);
-        delegate = (LanguageAnalyser) Factory.createResource(decl.impl, fm);
-    }
+	private def delegate;
 
-    @Override
-    def process(Document document)
-    {		
-		Document docForGate = new Document();
-		if(!(document.data instanceof gate.Document)){			
-			ConvertToGate conGate = new ConvertToGate();
-			CAS cas = null;			
-			if (document.data instanceof CAS) {
-				cas = document.data;
-			}
-			else if (document.data instanceof JCas) {
-				cas = ((JCas) document.data).getCas();
-			}
-			docForGate.data = conGate.convert(cas.getJCas());
+	def init(Component decl) {
+		FeatureMap fm = new SimpleFeatureMapImpl();
+		fm.putAll(decl.parameters);
+		if(decl.role.equals(ComponentRole.PROCESSOR))
+			delegate = (LanguageAnalyser) Factory.createResource(decl.impl, fm);
+		else if(decl.role.equals(ComponentRole.WRITER))
+			delegate = (DocumentExporter) Factory.createResource(decl.impl, fm);
+	}
+
+	@Override
+	def process(Document document)
+	{
+
+		if (!(document.data instanceof gate.Document)) {
+			throw new IllegalArgumentException("Cannot process $document");
 		}
-        
-		//still not instanceof gate.document
-		if (!(docForGate.data instanceof gate.Document)) {
-            throw new IllegalArgumentException("Cannot process $document");
-        }
-        
-        delegate.setDocument(docForGate.data);
-        delegate.execute();
-		
-    }
+		if(delegate instanceof LanguageAnalyser)
+		{
+			delegate.setDocument(document.data);
+			delegate.execute();
+		}else if(delegate instanceof DocumentExporter){
+			File out = new File("src/test/resources/ScriptBase/GateTest/outputOut.txt");
+			out.createNewFile();			
+			delegate.export(document.data,out);
+		}
+	}
 
-    @Override
-    def destroy()
-    {
-        Factory.deleteResource(delegate);
-    }
+	@Override
+	def destroy()
+	{
+		Factory.deleteResource(delegate);
+	}
 }

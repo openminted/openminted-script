@@ -59,7 +59,7 @@ class UimaComponentInstance implements ComponentInstance {
         else if (document.data instanceof JCas) {
             cas = ((JCas) document.data).getCas();
         }
-        else if (document.data == null) {
+        else if (document.data == null || delegate instanceof CollectionReader) {
             // Force re-scan of type systems because we dynamically add JARs to the
             // classpath using grape - failure to do so will cause some types not to
             // be detected when the pipeline is actually run
