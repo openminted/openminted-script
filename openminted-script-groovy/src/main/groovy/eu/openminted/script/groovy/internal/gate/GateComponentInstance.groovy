@@ -38,14 +38,21 @@ import gate.util.SimpleFeatureMapImpl;;
 
 class GateComponentInstance implements ComponentInstance {
 	private def delegate;
+	private def parameters=[:];
 
 	def init(Component decl) {
 		FeatureMap fm = new SimpleFeatureMapImpl();
-		fm.putAll(decl.parameters);
+
 		if(decl.role.equals(ComponentRole.PROCESSOR))
+		{
+			fm.putAll(decl.parameters);
 			delegate = (LanguageAnalyser) Factory.createResource(decl.impl, fm);
+		}
 		else if(decl.role.equals(ComponentRole.WRITER))
+		{	parameters = decl.parameters;
+			decl.parameters=[:];
 			delegate = (DocumentExporter) Factory.createResource(decl.impl, fm);
+		}
 	}
 
 	@Override
@@ -60,8 +67,23 @@ class GateComponentInstance implements ComponentInstance {
 			delegate.setDocument(document.data);
 			delegate.execute();
 		}else if(delegate instanceof DocumentExporter){
-			File out = new File("src/test/resources/ScriptBase/GateTest/outputOut.txt");
-			out.createNewFile();			
+			def out;
+			if(parameters)
+			{
+				if(parameters['targetLocation'])
+				{
+					out = new File(parameters['targetLocation']+"/output.txt");
+					if(parameters["overwrite"])
+					{
+						out.delete();						
+					}					
+					out.createNewFile();
+				}
+			}
+
+			if(!out)
+				out = System.out;
+
 			delegate.export(document.data,out);
 		}
 	}
