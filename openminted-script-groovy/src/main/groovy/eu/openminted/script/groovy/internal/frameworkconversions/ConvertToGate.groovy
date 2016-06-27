@@ -1,6 +1,20 @@
-package eu.openminted.script.groovy.internal
-
-
+// ****************************************************************************
+// See the NOTICE.txt file distributed with this work for additional information
+// regarding copyright ownership.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ****************************************************************************
+package eu.openminted.script.groovy.internal.frameworkconversions
 
 import org.apache.uima.cas.CAS;
 import org.apache.uima.fit.util.JCasUtil;
@@ -19,7 +33,7 @@ import gate.util.GateException;
 import gate.util.SimpleFeatureMapImpl;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 
-public class ConvertToGate {
+public class ConvertToGate implements ConvertFramework{
 	public Document convert(def aJCas) throws GateException {
 		
 		CAS cas = null;
@@ -29,8 +43,7 @@ public class ConvertToGate {
 		else if (aJCas instanceof JCas) {
 			cas = ((JCas) aJCas).getCas();
 		} else{
-			System.err.println("Input is not a UIMA cas");
-			return null;
+			  throw new IllegalArgumentException("Input in the pipeline is not a UIMA CAS");			
 		}
 		aJCas = cas.getJCas();
 		
@@ -40,7 +53,7 @@ public class ConvertToGate {
 		document.setContent(new DocumentContentImpl(aJCas.getDocumentText()));
 
 		AnnotationSet annSet = document.getAnnotations();
-
+		
 		for (TOP fs : JCasUtil.selectAll(aJCas)) {
 			if (processed.contains(fs.getAddress())) {
 				continue;

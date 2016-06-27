@@ -24,9 +24,9 @@ import org.apache.uima.fit.factory.JCasFactory
 
 import eu.openminted.script.groovy.internal.Component
 import eu.openminted.script.groovy.internal.ComponentInstance
-import eu.openminted.script.groovy.internal.ComponentRole;
-import eu.openminted.script.groovy.internal.ConvertToGate;
+import eu.openminted.script.groovy.internal.ComponentRole
 import eu.openminted.script.groovy.internal.Document
+import eu.openminted.script.groovy.internal.frameworkconversions.ConvertToGate;
 import gate.DocumentExporter;
 import gate.Factory
 import gate.FeatureMap;
