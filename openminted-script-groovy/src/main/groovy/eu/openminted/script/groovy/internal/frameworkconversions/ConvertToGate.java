@@ -14,12 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ****************************************************************************
-package eu.openminted.script.groovy.internal.frameworkconversions
+package eu.openminted.script.groovy.internal.frameworkconversions;
 
 import org.apache.uima.cas.CAS;
-import org.apache.uima.fit.util.JCasUtil;
+import org.apache.uima.cas.text.AnnotationFS;
+import org.apache.uima.fit.util.CasUtil;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.cas.TOP;
 import de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Lemma;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
@@ -34,28 +34,28 @@ import gate.util.SimpleFeatureMapImpl;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 
 public class ConvertToGate implements ConvertFramework{
-	public Document convert(def aJCas) throws GateException {
+	@Override
+    public Document convert(Object aJCas) throws GateException {
 		
 		CAS cas = null;
 		if (aJCas instanceof CAS) {
-			cas = aJCas;
+			cas = (CAS) aJCas;
 		}
 		else if (aJCas instanceof JCas) {
 			cas = ((JCas) aJCas).getCas();
 		} else{
 			  throw new IllegalArgumentException("Input in the pipeline is not a UIMA CAS");			
 		}
-		aJCas = cas.getJCas();
 		
 		IntOpenHashSet processed = new IntOpenHashSet();
 
 		Document document = new DocumentImpl();
-		document.setContent(new DocumentContentImpl(aJCas.getDocumentText()));
+		document.setContent(new DocumentContentImpl(cas.getDocumentText()));
 
 		AnnotationSet annSet = document.getAnnotations();
 		
-		for (TOP fs : JCasUtil.selectAll(aJCas)) {
-			if (processed.contains(fs.getAddress())) {
+		for (AnnotationFS fs : CasUtil.selectAll(cas)) {
+			if (processed.contains(cas.getLowLevelCAS().ll_getFSRef(fs))) {
 				continue;
 			}
 
@@ -91,7 +91,7 @@ public class ConvertToGate implements ConvertFramework{
 				System.err.printf("Don't know how to handle type: %s%n", fs.getType().getName());
 			}
 
-			processed.add(fs.getAddress());
+			processed.add(cas.getLowLevelCAS().ll_getFSRef(fs));
 		}
 
 		return document;
