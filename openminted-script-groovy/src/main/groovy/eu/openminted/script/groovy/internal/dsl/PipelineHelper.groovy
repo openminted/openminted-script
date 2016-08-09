@@ -17,6 +17,7 @@
 package eu.openminted.script.groovy.internal.dsl
 
 import groovy.grape.Grape;
+import groovy.json.JsonSlurper
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.*;
 import static org.apache.uima.fit.factory.CollectionReaderFactory.*;
@@ -36,27 +37,55 @@ import eu.openminted.script.groovy.internal.PipelineContext;
 
 import org.apache.uima.fit.component.JCasAnnotator_ImplBase
 
-import java.util.UUID;
+import java.util.UUID
+import java.util.logging.Logger;;
 
 class PipelineHelper
 {
     PipelineContext context;
-    
+
     def PipelineHelper(PipelineContext aContext) {
         context = aContext;
     }
-    
+
     def apply(@DelegatesTo(WriterHelper) engine) {
         if (engine instanceof String || engine instanceof GString) {
             def component = context.load(engine, ComponentRole.PROCESSOR);
             context.pipeline.add(component);
             return component;
         }
-        else {
-            throw new IllegalArgumentException("Cannot apply $engine");
+        else { if(engine instanceof Map){
+                def component = context.load(engine, ComponentRole.PROCESSOR);
+                context.pipeline.add(component);
+                return component;
+
+            }else{
+                throw new IllegalArgumentException("Cannot apply $engine");
+            }
         }
     }
 
+    def catalog(format){
+        if(format instanceof Map){
+            if(format.size()>1){
+                throw new IllegalArgumentException("Catalog should be define one by one")
+            }
+            def JSONCatalog;
+            def catalogKey = format.keySet().getAt(0);
+
+            try{               
+                URL url = new URL(format.get(catalogKey));
+                JSONCatalog = new JsonSlurper().parseText(new URL(format.get(catalogKey)).text);
+            }catch(MalformedURLException e){                
+                JSONCatalog = new JsonSlurper().parse(this.getClass().getResourceAsStream(format.get(catalogKey)));
+            }
+            context.addCatalog(JSONCatalog,catalogKey.toString().toLowerCase());
+
+        }else{
+            throw new IllegalStateException("Catalog must be a map of framework and, URL or classpath of the catalog file")
+        }
+
+    }
     def read(@DelegatesTo(EngineHelper) format) {
         if (!context.pipeline.isEmpty()) {
             throw new IllegalStateException("Reader must be first and there can only be one");
@@ -68,7 +97,14 @@ class PipelineHelper
             return component;
         }
         else {
-            throw new IllegalArgumentException("Cannot read $format");
+            if(format instanceof Map){
+                def component = context.load(format, ComponentRole.READER);
+                context.pipeline.add(component);
+                return component;
+
+            }else{
+                throw new IllegalArgumentException("Cannot read $format");
+            }
         }
     }
 
@@ -79,7 +115,14 @@ class PipelineHelper
             return component;
         }
         else {
-            throw new IllegalArgumentException("Cannot write $format");
+            if(format instanceof Map){
+                def component = context.load(format, ComponentRole.WRITER);
+                context.pipeline.add(component);
+                return component;
+
+            }else{
+                throw new IllegalArgumentException("Cannot write $format");
+            }
         }
     }
 }

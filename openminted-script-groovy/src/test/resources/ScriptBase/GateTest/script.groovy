@@ -5,4 +5,4 @@ apply 'BreakIteratorSegmenter'
 
 apply 'POSTagger'
 
-write 'CasDump' 
+write 'GateXMLExporter' 
