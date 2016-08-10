@@ -46,9 +46,6 @@ class GateLoader implements Loader {
 	}
 
 	Component load(ComponentOffer offer) {
-		Grape.addResolver(
-				name:'ukp-oss-snapshots',
-				root:'http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots')
 		ClassLoader cl = context.findClassLoader();
 
 		// load the plugin via Maven

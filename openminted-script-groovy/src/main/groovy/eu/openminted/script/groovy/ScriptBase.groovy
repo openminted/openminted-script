@@ -16,26 +16,27 @@
 // ****************************************************************************
 package eu.openminted.script.groovy;
 
-import eu.openminted.script.groovy.internal.PipelineContext
-import eu.openminted.script.groovy.internal.dsl.EngineHelper;
-import eu.openminted.script.groovy.internal.dsl.PipelineHelper;
-import eu.openminted.script.groovy.internal.dsl.WriterHelper
-import eu.openminted.script.groovy.internal.utils.Utils;
+import static org.apache.uima.fit.factory.TypeSystemDescriptionFactory.*
+import static org.apache.uima.fit.pipeline.SimplePipeline.*
 import eu.openminted.script.groovy.internal.ComponentInstance
-import eu.openminted.script.groovy.internal.ComponentRole;
-import eu.openminted.script.groovy.internal.Document;
-import eu.openminted.script.groovy.internal.Helper;
-
-import static org.apache.uima.fit.factory.TypeSystemDescriptionFactory.*;
-import static org.apache.uima.fit.pipeline.SimplePipeline.*;
-
-import org.apache.uima.collection.CollectionReaderDescription;
-import org.apache.uima.analysis_engine.AnalysisEngineDescription;
+import eu.openminted.script.groovy.internal.ComponentRole
+import eu.openminted.script.groovy.internal.Document
+import eu.openminted.script.groovy.internal.PipelineContext
+import eu.openminted.script.groovy.internal.dsl.PipelineHelper
+import eu.openminted.script.groovy.internal.utils.Utils
+import groovy.grape.Grape
 
 abstract class ScriptBase extends DelegatingScript {
     abstract void scriptBody()
 
     def run() {
+        Grape.addResolver(
+            name:'ukp-oss-snapshots',
+            root:'http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots')
+        Grape.addResolver(
+            name:'apache-snapshots',
+            root:'http://repository.apache.org/snapshots')
+        
         // Avoid an NPE while calling context.findClassLoader() which calls back into this class
         setDelegate(this);
 
