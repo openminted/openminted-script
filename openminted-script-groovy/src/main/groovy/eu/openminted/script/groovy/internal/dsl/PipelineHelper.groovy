@@ -30,6 +30,9 @@ import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_component.AnalysisComponent_ImplBase;
 
 import org.apache.uima.fit.factory.TypeSystemDescriptionFactory
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import eu.openminted.script.groovy.internal.Component
 import eu.openminted.script.groovy.internal.ComponentRole;
@@ -39,6 +42,7 @@ import org.apache.uima.fit.component.JCasAnnotator_ImplBase
 
 import java.util.UUID
 import java.util.logging.Logger;;
+import jp.go.nict.langrid.commons.lang.ResourceNotFoundException
 
 class PipelineHelper
 {
@@ -76,8 +80,16 @@ class PipelineHelper
             try{               
                 URL url = new URL(format.get(catalogKey));
                 JSONCatalog = new JsonSlurper().parseText(new URL(format.get(catalogKey)).text);
-            }catch(MalformedURLException e){                
-                JSONCatalog = new JsonSlurper().parse(this.getClass().getResourceAsStream(format.get(catalogKey)));
+            }catch(MalformedURLException e){                 
+                GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader);
+                PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
+                Resource urlResource = resolver.getResource(format.get(catalogKey));
+                if(urlResource.exists()){
+                    JSONCatalog = new JsonSlurper().parse(urlResource.getFile());
+                }else{
+                    throw new ResourceNotFoundException("Classpath url for the catalog is not valid");
+                }                
+                
             }
             context.addCatalog(JSONCatalog,catalogKey.toString().toLowerCase());
 

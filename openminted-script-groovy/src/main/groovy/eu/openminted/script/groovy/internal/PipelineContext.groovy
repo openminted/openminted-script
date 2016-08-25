@@ -60,8 +60,7 @@ class PipelineContext
                 offer.role = ComponentRole.READER;
                 registry.add(offer);
             }
-            else{
-                if (v.writerClass) {
+            else if (v.writerClass) {
                     ComponentOffer offer = new ComponentOffer();
                     def framework = key.toString();
                     offer.groupId = v.groupId;
@@ -83,9 +82,7 @@ class PipelineContext
                     offer.framework = framework;
                     offer.role = ComponentRole.PROCESSOR;
                     registry.add(offer);
-                }
-
-            }
+                }           
         }
     }
     def load(component, ComponentRole role) {
