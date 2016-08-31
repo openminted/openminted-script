@@ -17,44 +17,66 @@
 package eu.openminted.script.groovy
 
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.Test
+
+import wslite.rest.Response;
 import wslite.soap.SOAPClient
 import wslite.soap.SOAPMessageBuilder
 
 
 class IlspExperiment
 {
-    @Ignore("Doesn't work yet")
+
     @Test
     public void test()
     {
         def client = new SOAPClient('http://nlp.ilsp.gr:80/soaplab2-axis/typed/services/getstarted.ilsp_nlp')
-        
-        def message = new SOAPMessageBuilder().build { 
+
+        def reqMsg = new SOAPMessageBuilder().build {
             body {
-                appInputs('xmlns':'http://soaplab.org/ilsp_nlp') {
-                    inputType(2011)
-                    outputType("txt")
-                    input_direct_data("This is a test.")
-                    inputEncoding("UTF-8")
+                'ns2:run'('xmlns:ns2':'http://soaplab.org/ilsp_nlp','xmlns:ns3' : 'http://soaplab.org/typedws') {
+                    InputType("txt")
+                    OutputType("xceslemma")
+                    input_direct_data("Η Αττική είναι ιστορική περιοχή της Ελλάδας που σήμερα.")
+                    input_url("")
+                    InputEncoding("UTF-8")
                     language("el")
+                    inputIsURLlist("false")
+                }
+            }
+        }
+        def response = client.send(reqMsg.toString());
+        def jobIdObj =  response.envelope;
+        def waitForMsg =  new SOAPMessageBuilder().build {
+            body {
+                'ns3:waitfor'('xmlns:ns2':'http://soaplab.org/ilsp_nlp','xmlns:ns3' : 'http://soaplab.org/typedws'){
+                    jobId{ jobId(jobIdObj) }
+                }
+            }
+        }
+        def waitForJob = client.send(waitForMsg.toString())
+
+        def statusMsg = new SOAPMessageBuilder().build {
+            body {
+                'ns3:getResults'('xmlns:ns2':'http://soaplab.org/ilsp_nlp','xmlns:ns3' : 'http://soaplab.org/typedws'){
+                    jobId{ jobId(jobIdObj) }
+                }
+            }            
+        }
+        def statusResponse = client.send(statusMsg.toString());
+        
+        // TODO: check if complete then only move forward
+        
+        def resultMsg = new SOAPMessageBuilder().build {
+            body {
+                'ns3:getResults'('xmlns:ns2':'http://soaplab.org/ilsp_nlp','xmlns:ns3' : 'http://soaplab.org/typedws'){
+                    jobId{ jobId(jobIdObj) }
                 }
             }
         }
         
-        println message;
+        def resultResponse = client.send(resultMsg.toString());
         
-        def response = client.send(SOAPAction:'runAndWaitFor') {
-            body {
-                appInputs('xmlns':'http://soaplab.org/ilsp_nlp') {
-                    inputType(2011)
-                    outputType("txt")
-                    input_direct_data("This is a test.")
-                    inputEncoding("UTF-8")
-                    language("el")
-                }
-            }
-        }
-        println response;
+        println resultResponse.text;
     }
 }
