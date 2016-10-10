@@ -31,6 +31,9 @@ abstract class ScriptBase extends DelegatingScript {
 
     def run() {
         Grape.addResolver(
+            name:'omtd-oss-snapshots',
+            root:'https://repo.openminted.eu/content/repositories/snapshots')
+        Grape.addResolver(
             name:'ukp-oss-snapshots',
             root:'http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots')
         Grape.addResolver(

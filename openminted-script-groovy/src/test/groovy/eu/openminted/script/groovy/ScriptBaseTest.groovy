@@ -81,6 +81,8 @@ class ScriptBaseTest {
         oldModelCache = System.setProperty("dkpro.model.repository.cache",
                 "target/test-output/models");
         oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
+        
+        System.setProperty("M2_SETTINGS_XML", "src/test/resources/maven/settings.xml");
     }
 
     @AfterClass
