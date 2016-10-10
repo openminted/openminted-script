@@ -10,4 +10,5 @@ apply 'BreakIteratorSegmenter'
 
 apply 'POSTagger'
 
-write 'GateXMLExporter' 
+write 'GateXMLExporter' to "${testOutputPath}/output.txt" params([
+    overwrite: true])

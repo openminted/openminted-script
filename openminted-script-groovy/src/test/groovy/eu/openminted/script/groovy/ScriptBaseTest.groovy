@@ -18,8 +18,10 @@ package eu.openminted.script.groovy
 
 import static org.junit.Assert.*;
 
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption;
 
 import groovy.io.FileType
 
@@ -91,7 +93,8 @@ class ScriptBaseTest {
         Files.createDirectories(Paths.get("target/test-output/grapes"));
         Files.copy(
             Paths.get("src/test/resources/grape/grapeConfig.xml"), 
-            Paths.get("target/test-output/grapes/grapeConfig.xml"));
+            Paths.get("target/test-output/grapes/grapeConfig.xml"),
+            StandardCopyOption.REPLACE_EXISTING);
     }
 
     @AfterClass
