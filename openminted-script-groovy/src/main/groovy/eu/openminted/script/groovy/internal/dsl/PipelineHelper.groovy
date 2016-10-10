@@ -58,46 +58,47 @@ class PipelineHelper
             context.pipeline.add(component);
             return component;
         }
-        else { if(engine instanceof Map){
-                def component = context.load(engine, ComponentRole.PROCESSOR);
-                context.pipeline.add(component);
-                return component;
-
-            }else{
-                throw new IllegalArgumentException("Cannot apply $engine");
-            }
+        else if(engine instanceof Map) {
+            def component = context.load(engine, ComponentRole.PROCESSOR);
+            context.pipeline.add(component);
+            return component;
+        } else {
+            throw new IllegalArgumentException("Cannot apply $engine");
         }
     }
 
     def catalog(format){
-        if(format instanceof Map){
-            if(format.size()>1){
-                throw new IllegalArgumentException("Catalog should be define one by one")
+        if (format instanceof Map){
+            if (format.size()>1){
+                throw new IllegalArgumentException("Catalog should be defined one by one")
             }
+            
             def JSONCatalog;
             def catalogKey = format.keySet().getAt(0);
 
-            try{               
+            try {               
                 URL url = new URL(format.get(catalogKey));
                 JSONCatalog = new JsonSlurper().parseText(new URL(format.get(catalogKey)).text);
-            }catch(MalformedURLException e){                 
+            }
+            catch (MalformedURLException e) {                 
                 GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader);
                 PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
                 Resource urlResource = resolver.getResource(format.get(catalogKey));
-                if(urlResource.exists()){
+                if (urlResource.exists()) {
                     JSONCatalog = new JsonSlurper().parse(urlResource.getFile());
-                }else{
+                }
+                else {
                     throw new ResourceNotFoundException("Classpath url for the catalog is not valid");
                 }                
                 
             }
             context.addCatalog(JSONCatalog,catalogKey.toString().toLowerCase());
 
-        }else{
+        } else {
             throw new IllegalStateException("Catalog must be a map of framework and, URL or classpath of the catalog file")
         }
-
     }
+    
     def read(@DelegatesTo(EngineHelper) format) {
         if (!context.pipeline.isEmpty()) {
             throw new IllegalStateException("Reader must be first and there can only be one");

@@ -48,19 +48,20 @@ class PipelineContext
 
     def addCatalog(def JSONobj,def key){
         JSONobj.each {k,v ->
-            if (v.readerClass) {
-                ComponentOffer offer = new ComponentOffer();
-                def framework = key.toString();
-                offer.groupId = v.groupId;
-                offer.artifactId = v.artifactId;
-                offer.version = v.version;
-                offer.name = k;
-                offer.implName = v["readerClass"];
-                offer.framework = framework;
-                offer.role = ComponentRole.READER;
-                registry.add(offer);
-            }
-            else if (v.writerClass) {
+            if (v.readerClass || v.writerClass) {
+                if (v.readerClass) {
+                    ComponentOffer offer = new ComponentOffer();
+                    def framework = key.toString();
+                    offer.groupId = v.groupId;
+                    offer.artifactId = v.artifactId;
+                    offer.version = v.version;
+                    offer.name = k;
+                    offer.implName = v["readerClass"];
+                    offer.framework = framework;
+                    offer.role = ComponentRole.READER;
+                    registry.add(offer);
+                }
+                if (v.writerClass) {
                     ComponentOffer offer = new ComponentOffer();
                     def framework = key.toString();
                     offer.groupId = v.groupId;
@@ -71,18 +72,20 @@ class PipelineContext
                     offer.framework = framework;
                     offer.role = ComponentRole.WRITER;
                     registry.add(offer);
-                }else{
-                    ComponentOffer offer = new ComponentOffer();
-                    def framework = key.toString();
-                    offer.groupId = v.groupId;
-                    offer.artifactId = v.artifactId;
-                    offer.version = v.version;
-                    offer.name = k;
-                    offer.implName = v["class"];
-                    offer.framework = framework;
-                    offer.role = ComponentRole.PROCESSOR;
-                    registry.add(offer);
-                }           
+                }
+            }
+            else {
+                ComponentOffer offer = new ComponentOffer();
+                def framework = key.toString();
+                offer.groupId = v.groupId;
+                offer.artifactId = v.artifactId;
+                offer.version = v.version;
+                offer.name = k;
+                offer.implName = v["class"];
+                offer.framework = framework;
+                offer.role = ComponentRole.PROCESSOR;
+                registry.add(offer);
+            }           
         }
     }
     def load(component, ComponentRole role) {
@@ -100,25 +103,29 @@ class PipelineContext
             if (!offer) {
                 throw new IllegalArgumentException("Unable to find $component as $role");
             }
-            if(offer.size()>1){
+            
+            if (offer.size()>1){
                 throw new IllegalArgumentException("More than 1 component present for $component as $role, check the catalog");
             }
 
             Loader loader = frameworks[offer.get(0).framework];
             comp = loader.load(offer);
-        }else{
+        } else {
             if(component instanceof Map){
                 String framework = component.keySet().getAt(0);
                 String compName = component.get(framework);
                 List<ComponentOffer> offer = registry.findAll { it ->
                     it.role == role && it.name == compName && it.framework.toLowerCase() == framework.toLowerCase();
                 }
+                
                 if (!offer) {
                     throw new IllegalArgumentException("Unable to find $component as $role");
                 }
+                
                 if(offer.size()>1){
                     throw new IllegalArgumentException("More than 1 component present for $component as $role, check the catalog");
                 }
+                
                 Loader loader = frameworks[offer[0].framework.toLowerCase()];
                 comp = loader.load(offer[0]);                
             }

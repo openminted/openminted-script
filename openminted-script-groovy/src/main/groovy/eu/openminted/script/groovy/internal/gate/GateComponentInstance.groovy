@@ -62,27 +62,27 @@ class GateComponentInstance implements ComponentInstance {
 		if (!(document.data instanceof gate.Document)) {
 			throw new IllegalArgumentException("Cannot process $document");
 		}
-		if(delegate instanceof LanguageAnalyser)
+        
+		if (delegate instanceof LanguageAnalyser)
 		{
 			delegate.setDocument(document.data);
 			delegate.execute();
-		}else if(delegate instanceof DocumentExporter){
+		}
+        else if(delegate instanceof DocumentExporter) {
 			def out;
-			if(parameters)
-			{
-				if(parameters['targetLocation'])
-				{
-					out = new File(parameters['targetLocation']+"/output.txt");
-					if(parameters["overwrite"])
-					{
+			if (parameters) {
+				if(parameters['targetLocation']) {
+					out = new File(parameters['targetLocation']);
+					if(parameters["overwrite"] && out.exists()) {
 						out.delete();						
 					}					
-					out.createNewFile();
+                    out.getParentFile().mkdirs();
 				}
 			}
 
-			if(!out)
+			if (!out) {
 				out = System.out;
+			}
 
 			delegate.export(document.data,out);
 		}
