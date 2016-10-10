@@ -16,7 +16,11 @@
 // ****************************************************************************
 package eu.openminted.script.groovy
 
-import static org.junit.Assert.*
+import static org.junit.Assert.*;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import groovy.io.FileType
 
 import org.apache.commons.logging.Log
@@ -83,6 +87,11 @@ class ScriptBaseTest {
         oldGrapeCache = System.setProperty("grape.root", "target/test-output/grapes");
         
         System.setProperty("M2_SETTINGS_XML", "src/test/resources/maven/settings.xml");
+        
+        Files.createDirectories(Paths.get("target/test-output/grapes"));
+        Files.copy(
+            Paths.get("src/test/resources/grape/grapeConfig.xml"), 
+            Paths.get("target/test-output/grapes/grapeConfig.xml"));
     }
 
     @AfterClass
