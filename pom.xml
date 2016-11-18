@@ -30,6 +30,20 @@
   <properties>
     <groovy.version>2.4.7</groovy.version>
   </properties>
+  <repositories>
+    <!-- For UIMA/uimaFIT SNAPSHOT -->
+    <repository>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>http://repository.apache.org/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
   <modules>
     <module>openminted-script-groovy</module>
     <module>openminted-script-doc</module>
