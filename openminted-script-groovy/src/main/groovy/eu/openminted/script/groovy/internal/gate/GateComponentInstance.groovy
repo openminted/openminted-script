@@ -32,7 +32,7 @@ import gate.Factory
 import gate.FeatureMap;
 import gate.Gate;
 import gate.LanguageAnalyser
-import gate.Plugin
+import gate.creole.Plugin
 import gate.corpora.export.GateXMLExporter;
 import gate.util.SimpleFeatureMapImpl;;
 

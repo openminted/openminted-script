@@ -25,7 +25,7 @@ import eu.openminted.script.groovy.internal.ComponentOffer
 import eu.openminted.script.groovy.internal.Loader
 import eu.openminted.script.groovy.internal.PipelineContext
 import gate.Gate
-import gate.Plugin
+import gate.creole.Plugin
 import groovy.grape.Grape
 
 class GateLoader implements Loader {

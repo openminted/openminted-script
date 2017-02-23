@@ -3,7 +3,7 @@
         "name": "POSTagger",
         "groupId": "uk.ac.gate.plugins",
         "artifactId": "annie",
-        "version": "9.0-SNAPSHOT",
+        "version": "8.5-SNAPSHOT",
         "class": "gate.creole.POSTagger"
     }
 }
