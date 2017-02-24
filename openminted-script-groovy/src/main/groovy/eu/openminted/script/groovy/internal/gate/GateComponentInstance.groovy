@@ -41,7 +41,7 @@ class GateComponentInstance implements ComponentInstance {
 	private def parameters=[:];
 
 	def init(Component decl) {
-		FeatureMap fm = new SimpleFeatureMapImpl();
+		FeatureMap fm = Factory.newFeatureMap();
 
 		if(decl.role.equals(ComponentRole.PROCESSOR))
 		{
